@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import dbGames from '../../game-db.json';
+
 // Type definitions for the electron window api
 declare global {
   interface Window {
@@ -17,18 +19,13 @@ const App = () => {
     // Load library and settings on mount
     const loadData = async () => {
       if (window.electronAPI) {
-        const dbGames = await window.electronAPI.readLibrary();
-        setGames(dbGames);
+        const desktopGames = await window.electronAPI.readLibrary();
+        setGames(desktopGames);
         const path = await window.electronAPI.getInstallPath();
         setInstallPath(path);
       } else {
-        // Fallback dummy data for web browser preview
-        setGames([{
-          id: "preview-game",
-          name: "Preview Game",
-          genre: "Action",
-          description: "This is a placeholder because you are running in a web browser without Electron."
-        }]);
+        // Fallback for web browser
+        setGames(dbGames);
       }
     };
     loadData();
@@ -58,7 +55,10 @@ const App = () => {
   }, []);
 
   const handleInstallGame = async (game: any) => {
-    if (!window.electronAPI) return alert("Install is only available in the desktop app.");
+    if (!window.electronAPI) {
+      window.open(game.repoUrl, '_blank');
+      return;
+    }
     const destFolder = `${installPath}\\${game.id}`;
     
     // Clone
@@ -73,7 +73,10 @@ const App = () => {
   };
 
   const handlePlayGame = async (game: any) => {
-    if (!window.electronAPI) return alert("Play is only available in the desktop app.");
+    if (!window.electronAPI) {
+      window.open(game.repoUrl, '_blank');
+      return;
+    }
     const destFolder = `${installPath}\\${game.id}`;
     const launchCmd = typeof game.launchCommand === 'string' ? game.launchCommand : game.launchCommand?.windows;
     
