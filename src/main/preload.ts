@@ -2,7 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 
 contextBridge.exposeInMainWorld('electronAPI', {
   launchGame: (type: string, execPath: string, cwd: string) => ipcRenderer.invoke('launch-game', type, execPath, cwd),
-  cloneGame: (repoUrl: string, destPath: string) => ipcRenderer.invoke('clone-game', repoUrl, destPath),
+  cloneGame: (cloneCmd: string, destPath: string) => ipcRenderer.invoke('clone-game', cloneCmd, destPath),
   buildGame: (gameId: string, buildCmd: string, cwd: string) => ipcRenderer.invoke('build-game', gameId, buildCmd, cwd),
   openFolder: (folderPath: string) => ipcRenderer.invoke('open-folder', folderPath),
   selectDirectory: () => ipcRenderer.invoke('select-directory'),

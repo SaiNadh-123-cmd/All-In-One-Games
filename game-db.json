@@ -3,73 +3,180 @@
     "id": "endless-sky",
     "name": "Endless Sky",
     "description": "A sandbox space trading and combat game similar to the classic Escape Velocity series.",
-    "repoUrl": "https://github.com/endless-sky/endless-sky",
+    "github_url": "https://github.com/endless-sky/endless-sky",
     "genre": "Space Sim",
     "type": "native",
-    "buildInstructions": {
-      "windows": "scons",
-      "linux": "scons",
-      "macos": "scons"
-    },
-    "launchCommand": {
-      "windows": "endless-sky.exe",
-      "linux": "./endless-sky",
-      "macos": "EndlessSky.app/Contents/MacOS/EndlessSky"
-    }
+    "clone_command": "git clone --depth 1 https://github.com/endless-sky/endless-sky",
+    "build_command": "scons",
+    "run_command": "endless-sky.exe",
+    "local_path_template": "~/OfflineGames/endless-sky"
   },
   {
     "id": "openttd",
     "name": "OpenTTD",
     "description": "An open source simulation game based upon Transport Tycoon Deluxe.",
-    "repoUrl": "https://github.com/OpenTTD/OpenTTD",
+    "github_url": "https://github.com/OpenTTD/OpenTTD",
     "genre": "Simulation",
     "type": "native",
-    "buildInstructions": {
-      "windows": "cmake -B build && cmake --build build",
-      "linux": "cmake -B build && cmake --build build",
-      "macos": "cmake -B build && cmake --build build"
-    },
-    "launchCommand": {
-      "windows": "build/openttd.exe",
-      "linux": "build/openttd",
-      "macos": "build/openttd"
-    }
+    "clone_command": "git clone --depth 1 https://github.com/OpenTTD/OpenTTD",
+    "build_command": "cmake -B build && cmake --build build",
+    "run_command": "build/openttd.exe",
+    "local_path_template": "~/OfflineGames/openttd"
   },
   {
     "id": "2048",
     "name": "2048",
     "description": "A small clone of 1024.",
-    "repoUrl": "https://github.com/gabrielecirulli/2048",
+    "github_url": "https://github.com/gabrielecirulli/2048",
     "genre": "Puzzle",
     "type": "html5",
-    "launchCommand": "index.html"
+    "clone_command": "git clone --depth 1 https://github.com/gabrielecirulli/2048",
+    "build_command": "",
+    "run_command": "index.html",
+    "local_path_template": "~/OfflineGames/2048"
   },
   {
     "id": "clumsy-bird",
     "name": "Clumsy Bird",
     "description": "A MelonJS port of the famous Flappy Bird Game",
-    "repoUrl": "https://github.com/ellisonleao/clumsy-bird",
+    "github_url": "https://github.com/ellisonleao/clumsy-bird",
     "genre": "Arcade",
     "type": "html5",
-    "buildInstructions": {
-      "all": "npm install && npm run build"
-    },
-    "launchCommand": "index.html"
+    "clone_command": "git clone --depth 1 https://github.com/ellisonleao/clumsy-bird",
+    "build_command": "npm install && npm run build",
+    "run_command": "index.html",
+    "local_path_template": "~/OfflineGames/clumsy-bird"
   },
   {
     "id": "supertux",
     "name": "SuperTux",
     "description": "A classic 2D jump'n run sidescroller game in a style similar to the original Super Mario games.",
-    "repoUrl": "https://github.com/supertux/supertux",
+    "github_url": "https://github.com/supertux/supertux",
     "genre": "Platformer",
     "type": "native",
-    "buildInstructions": {
-      "all": "cmake . && make"
-    },
-    "launchCommand": {
-      "windows": "supertux2.exe",
-      "linux": "./supertux2",
-      "macos": "./supertux2"
-    }
+    "clone_command": "git clone --depth 1 https://github.com/supertux/supertux",
+    "build_command": "cmake . && make",
+    "run_command": "supertux2.exe",
+    "local_path_template": "~/OfflineGames/supertux"
+  },
+  {
+    "id": "chocolate-doom",
+    "name": "Chocolate Doom",
+    "description": "A Doom source port that accurately reproduces the experience of Doom as it was played in the 1990s.",
+    "github_url": "https://github.com/chocolate-doom/chocolate-doom",
+    "genre": "Shooting",
+    "type": "native",
+    "clone_command": "git clone --depth 1 https://github.com/chocolate-doom/chocolate-doom",
+    "build_command": "cmake -B build && cmake --build build",
+    "run_command": "build/src/chocolate-doom.exe",
+    "local_path_template": "~/OfflineGames/chocolate-doom"
+  },
+  {
+    "id": "ioquake3",
+    "name": "ioquake3",
+    "description": "The libre video game engine based on Quake 3: Arena.",
+    "github_url": "https://github.com/ioquake/ioq3",
+    "genre": "Shooting",
+    "type": "native",
+    "clone_command": "git clone --depth 1 https://github.com/ioquake/ioq3",
+    "build_command": "make",
+    "run_command": "build/release-mingw32-x86_64/ioquake3.x86_64.exe",
+    "local_path_template": "~/OfflineGames/ioquake3"
+  },
+  {
+    "id": "redeclipse",
+    "name": "Red Eclipse",
+    "description": "A free, open source arena shooter, built on the Tesseract engine.",
+    "github_url": "https://github.com/redeclipse/base",
+    "genre": "Shooting",
+    "type": "native",
+    "clone_command": "git clone --depth 1 --recursive https://github.com/redeclipse/base redeclipse",
+    "build_command": "make -C src install",
+    "run_command": "redeclipse.bat",
+    "local_path_template": "~/OfflineGames/redeclipse"
+  },
+  {
+    "id": "hypersomnia",
+    "name": "Hypersomnia",
+    "description": "An open-source, competitive, free-to-play 2D shooter with an integrated map editor.",
+    "github_url": "https://github.com/TeamHypersomnia/Hypersomnia",
+    "genre": "Shooting",
+    "type": "native",
+    "clone_command": "git clone --depth 1 https://github.com/TeamHypersomnia/Hypersomnia",
+    "build_command": "cmake -B build && cmake --build build",
+    "run_command": "build/Hypersomnia.exe",
+    "local_path_template": "~/OfflineGames/hypersomnia"
+  },
+  {
+    "id": "assaultcube",
+    "name": "AssaultCube",
+    "description": "A realistic, lightweight, fast-paced multiplayer first-person shooter.",
+    "github_url": "https://github.com/assaultcube/AC",
+    "genre": "Shooting",
+    "type": "native",
+    "clone_command": "git clone --depth 1 https://github.com/assaultcube/AC",
+    "build_command": "cd source/src && make",
+    "run_command": "bin_win32/ac_client.exe",
+    "local_path_template": "~/OfflineGames/assaultcube"
+  },
+  {
+    "id": "freedoom",
+    "name": "Freedoom",
+    "description": "A free content game based on the Doom engine.",
+    "github_url": "https://github.com/freedoom/freedoom",
+    "genre": "Shooting",
+    "type": "assets",
+    "clone_command": "git clone --depth 1 https://github.com/freedoom/freedoom",
+    "build_command": "make",
+    "run_command": "chocolate-doom -iwad wads/freedoom1.wad",
+    "local_path_template": "~/OfflineGames/freedoom"
+  },
+  {
+    "id": "openarena",
+    "name": "OpenArena",
+    "description": "A community-produced deathmatch FPS based on the Quake III Arena GPL source code.",
+    "github_url": "https://github.com/OpenArena/engine",
+    "genre": "Shooting",
+    "type": "native",
+    "clone_command": "git clone --depth 1 https://github.com/OpenArena/engine",
+    "build_command": "make",
+    "run_command": "build/release-mingw32-x86_64/openarena.x86_64.exe",
+    "local_path_template": "~/OfflineGames/openarena"
+  },
+  {
+    "id": "sauerbraten",
+    "name": "Cube 2: Sauerbraten",
+    "description": "A free multiplayer & singleplayer first person shooter, the successor of the Cube FPS.",
+    "github_url": "https://github.com/sauerbraten/sauerbraten",
+    "genre": "Shooting",
+    "type": "native",
+    "clone_command": "git clone --depth 1 https://github.com/sauerbraten/sauerbraten",
+    "build_command": "cd src && make install",
+    "run_command": "sauerbraten.bat",
+    "local_path_template": "~/OfflineGames/sauerbraten"
+  },
+  {
+    "id": "crispy-doom",
+    "name": "Crispy Doom",
+    "description": "A limit-removing enhanced-resolution Doom source port based on Chocolate Doom.",
+    "github_url": "https://github.com/fabiangreffrath/crispy-doom",
+    "genre": "Shooting",
+    "type": "native",
+    "clone_command": "git clone --depth 1 https://github.com/fabiangreffrath/crispy-doom",
+    "build_command": "cmake -B build && cmake --build build",
+    "run_command": "build/src/crispy-doom.exe",
+    "local_path_template": "~/OfflineGames/crispy-doom"
+  },
+  {
+    "id": "xonotic",
+    "name": "Xonotic",
+    "description": "An addictive, arena-style first person shooter with crisp movement and a wide array of weapons.",
+    "github_url": "https://github.com/Xonotic/xonotic",
+    "genre": "Shooting",
+    "type": "native",
+    "clone_command": "git clone --depth 1 https://github.com/Xonotic/xonotic",
+    "build_command": "make update-crypt && make",
+    "run_command": "xonotic-windows.exe",
+    "local_path_template": "~/OfflineGames/xonotic"
   }
 ]

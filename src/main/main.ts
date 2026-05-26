@@ -89,9 +89,9 @@ ipcMain.handle('read-library', () => {
   return [];
 });
 
-ipcMain.handle('clone-game', async (event, repoUrl: string, destPath: string) => {
-  return await cloneRepository(repoUrl, destPath, (msg) => {
-    event.sender.send('clone-progress', { url: repoUrl, message: msg });
+ipcMain.handle('clone-game', async (event, cloneCmd: string, destPath: string) => {
+  return await cloneRepository(cloneCmd, destPath, (msg) => {
+    event.sender.send('clone-progress', { url: destPath, message: msg });
   });
 });
 
