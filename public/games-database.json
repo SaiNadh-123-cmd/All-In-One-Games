@@ -7,7 +7,7 @@
     "play_url": "https://play2048.co/",
     "github_url": "https://github.com/gabrielecirulli/2048",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/1/18/2048_logo.svg"
+    "thumbnail": "/thumbnails/2048.svg"
   },
   {
     "id": "clumsy-bird",
@@ -17,7 +17,7 @@
     "play_url": "https://ellisonleao.github.io/clumsy-bird/",
     "github_url": "https://github.com/ellisonleao/clumsy-bird",
     "embed_type": "iframe",
-    "thumbnail": "https://raw.githubusercontent.com/ellisonleao/clumsy-bird/master/data/img/bg.png"
+    "thumbnail": "/thumbnails/clumsy-bird.png"
   },
   {
     "id": "hextris",
@@ -27,7 +27,7 @@
     "play_url": "https://hextris.io/",
     "github_url": "https://github.com/hextris/hextris",
     "embed_type": "iframe",
-    "thumbnail": "https://hextris.io/images/icons/apple-touch-icon-120x120.png"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "pacman-canvas",
@@ -37,7 +37,7 @@
     "play_url": "https://pacman.platzh1rsch.ch/",
     "github_url": "https://github.com/platzhersh/pacman-canvas",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/5/59/Pac-man.png"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "astray",
@@ -47,7 +47,7 @@
     "play_url": "https://www.stuartmarmstrong.com/astray/",
     "github_url": "https://github.com/wwwtyro/Astray",
     "embed_type": "iframe",
-    "thumbnail": "https://raw.githubusercontent.com/wwwtyro/Astray/master/images/astray.jpg"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "mkjs",
@@ -57,7 +57,7 @@
     "play_url": "https://mgechev.github.io/mk.js/",
     "github_url": "https://github.com/mgechev/mk.js",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/5/53/Mortal_Kombat_Logo.png"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "hexgl",
@@ -67,7 +67,7 @@
     "play_url": "https://hexgl.bkcore.com/play/",
     "github_url": "https://github.com/BKcore/HexGL",
     "embed_type": "iframe",
-    "thumbnail": "https://hexgl.bkcore.com/play/textures/hud/hexgl.png"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "browserquest",
@@ -77,7 +77,7 @@
     "play_url": "http://browserquest.mozilla.org/",
     "github_url": "https://github.com/browserquest/BrowserQuest",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/e/ed/BrowserQuest_screenshot.jpg"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "doom-wasm",
@@ -87,7 +87,7 @@
     "play_url": "https://silentspacemarine.com/",
     "github_url": "https://github.com/diekmann/wasm-fizzbuzz",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/5/5c/Doom_cover_art.jpg"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "js-doom",
@@ -97,7 +97,7 @@
     "play_url": "https://js-dos.com/games/doom.exe.html",
     "github_url": "https://github.com/caiiiycuk/js-dos",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/5/5c/Doom_cover_art.jpg"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "space-invaders",
@@ -107,7 +107,7 @@
     "play_url": "https://cykod.github.io/AlienInvasion/",
     "github_url": "https://github.com/cykod/AlienInvasion",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/e/e0/Space_Invaders_marquee.png"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "asteroids",
@@ -117,7 +117,7 @@
     "play_url": "https://dougx.net/asteroids/asteroids.html",
     "github_url": "https://github.com/dmcinnes/HTML5-Asteroids",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/c/c9/Asteroids_arcade_flyer.jpg"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "quakejs",
@@ -127,7 +127,7 @@
     "play_url": "http://www.quakejs.com/",
     "github_url": "https://github.com/inolen/quakejs",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/3/36/Quake3-box.jpg"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "duckhunt",
@@ -137,7 +137,7 @@
     "play_url": "https://duckhuntjs.com/",
     "github_url": "https://github.com/MattSurabian/DuckHunt-JS",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/c/cb/Duck_Hunt_Coverart.png"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "flappy-bird",
@@ -147,7 +147,7 @@
     "play_url": "https://hyspace.io/Flappy-Bird/",
     "github_url": "https://github.com/hyspace/Flappy-Bird",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/0/0a/Flappy_Bird_icon.png"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "snake",
@@ -157,7 +157,7 @@
     "play_url": "https://patorjk.com/games/snake/",
     "github_url": "https://github.com/patorjk/JavaScript-Snake",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Snake_videogame_logo.png/120px-Snake_videogame_logo.png"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "custom-tetris",
@@ -167,7 +167,7 @@
     "play_url": "https://ondras.github.io/custom-tetris/",
     "github_url": "https://github.com/ondras/custom-tetris",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/thumb/8/8d/NES_Tetris_Box_Front.jpg/220px-NES_Tetris_Box_Front.jpg"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "geometry-dash",
@@ -177,7 +177,7 @@
     "play_url": "https://gd.kdbot.xyz/",
     "github_url": "https://github.com/kdbotxyz/gd-html5",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/3/35/Geometry_Dash_Logo.PNG"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "wolf3d",
@@ -187,7 +187,7 @@
     "play_url": "https://wolf3d.net/",
     "github_url": "https://github.com/id-Software/wolf3d",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/3/30/Wolfenstein_3D_cover.png"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "radius-raid",
@@ -197,7 +197,7 @@
     "play_url": "https://js13kgames.com/games/radius-raid/index.html",
     "github_url": "https://github.com/jackrugile/radius-raid",
     "embed_type": "iframe",
-    "thumbnail": "https://js13kgames.com/games/radius-raid/thumb.jpg"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "core-type",
@@ -207,7 +207,7 @@
     "play_url": "https://js13kgames.com/games/core-type/index.html",
     "github_url": "https://github.com/tyleronlinux/core-type",
     "embed_type": "iframe",
-    "thumbnail": "https://js13kgames.com/games/core-type/thumb.jpg"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "super-mario-html5",
@@ -217,7 +217,7 @@
     "play_url": "https://fullscreenmario.com/",
     "github_url": "https://github.com/Diogenesthecynic/FullScreenMario",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/0/03/Super_Mario_Bros._box.png"
+    "thumbnail": "/thumbnails/super-mario-html5.png"
   },
   {
     "id": "doodle-jump",
@@ -227,7 +227,7 @@
     "play_url": "https://khtml5.com/games/doodle-jump/",
     "github_url": "https://github.com/khtml5/doodle-jump",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/a/ab/Doodle_Jump.png"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "breakout",
@@ -237,7 +237,7 @@
     "play_url": "https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript",
     "github_url": "https://github.com/end3r/Gamedev-Canvas-workshop",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/e/e0/Breakout_marquee.jpg"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "minesweeper",
@@ -247,7 +247,7 @@
     "play_url": "https://minesweeperonline.com/",
     "github_url": "https://github.com/mrgnr/minesweeper",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/d/d4/Minesweeper_Icon.png"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "simcity",
@@ -257,7 +257,7 @@
     "play_url": "http://micropolis.mostka.com/",
     "github_url": "https://github.com/simcity/micropolis",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/en/2/25/SimCity_Box_Cover.jpg"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "dino-game",
@@ -267,7 +267,7 @@
     "play_url": "https://chromedino.com/",
     "github_url": "https://github.com/wayou/t-rex-runner",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/3/30/Google_Chrome_T-Rex_dinosaur_game.png"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "sudoku",
@@ -277,7 +277,7 @@
     "play_url": "https://sudoku.com/",
     "github_url": "https://github.com/Pocket-Inc/sudoku-html5",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/f/ff/Sudoku-by-L2G-20050714.svg"
+    "thumbnail": "/thumbnails/sudoku.svg"
   },
   {
     "id": "solitaire",
@@ -287,7 +287,7 @@
     "play_url": "https://worldofsolitaire.com/",
     "github_url": "https://github.com/mrdaveb/solitaire",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Solitaire_Windows_XP.png"
+    "thumbnail": "/placeholder.png"
   },
   {
     "id": "pong",
@@ -297,6 +297,6 @@
     "play_url": "https://www.ponggame.org/",
     "github_url": "https://github.com/kakes1/Pong",
     "embed_type": "iframe",
-    "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/f/f8/Pong.png"
+    "thumbnail": "/thumbnails/pong.png"
   }
 ]
