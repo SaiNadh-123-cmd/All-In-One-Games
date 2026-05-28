@@ -12,6 +12,26 @@ interface Game {
   thumbnail: string;
 }
 
+const AdSenseWidget = () => {
+  useEffect(() => {
+    try {
+      (window as any).adsbygoogle = (window as any).adsbygoogle || [];
+      (window as any).adsbygoogle.push({});
+    } catch (e) {
+      console.error("AdSense error", e);
+    }
+  }, []);
+
+  return (
+    <ins className="adsbygoogle"
+         style={{ display: 'block' }}
+         data-ad-client="ca-pub-5224273312267357"
+         data-ad-slot="9181079962"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+  );
+};
+
 const App = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [activeTab, setActiveTab] = useState<'library' | 'discover'>('library');
@@ -87,9 +107,9 @@ const App = () => {
           </button>
         </nav>
         
-        {/* Ad Placeholder Space in Sidebar */}
-        <div className="mt-auto bg-slate-800/50 border border-slate-700/50 h-64 rounded flex items-center justify-center p-4 text-center">
-          <span className="text-sm text-slate-500 font-semibold uppercase tracking-wider">Ad Space</span>
+        {/* Ad Space in Sidebar */}
+        <div className="mt-auto bg-slate-800/50 border border-slate-700/50 rounded p-2 text-center w-full min-h-[250px]">
+          <AdSenseWidget />
         </div>
       </div>
       
@@ -111,9 +131,9 @@ const App = () => {
           </div>
         )}
 
-        {/* Ad Placeholder Space in Bottom Area */}
-        <div className="mt-8 bg-slate-800/50 border border-slate-700/50 h-24 rounded flex items-center justify-center p-4 text-center shrink-0">
-          <span className="text-sm text-slate-500 font-semibold uppercase tracking-wider">Bottom Ad Space</span>
+        {/* Ad Space in Bottom Area */}
+        <div className="mt-8 bg-slate-800/50 border border-slate-700/50 rounded p-2 text-center shrink-0 w-full min-h-[100px]">
+          <AdSenseWidget />
         </div>
       </div>
 
