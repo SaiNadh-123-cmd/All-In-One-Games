@@ -93,7 +93,10 @@ const App = () => {
     <div className="flex h-screen w-full overflow-hidden bg-background">
       {/* Sidebar */}
       <div className="w-64 bg-card border-r border-slate-700/50 p-4 flex flex-col gap-4 z-10 hidden md:flex">
-        <h1 className="text-xl font-bold text-primary">WebGames Portal</h1>
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-lg shadow-lg" />
+          <h1 className="text-xl font-bold text-primary">WebGames Portal</h1>
+        </div>
         <nav className="flex flex-col gap-2 flex-1">
           <button 
             onClick={() => setActiveTab('library')}
