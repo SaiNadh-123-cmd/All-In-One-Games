@@ -58,7 +58,7 @@ const App = () => {
           <img 
             src={game.thumbnail} 
             alt={game.name} 
-            className="w-full h-full object-cover opacity-80 hover:opacity-100 transition"
+            className="w-full h-full object-contain p-4 bg-slate-900 opacity-80 hover:opacity-100 transition"
             onError={(e) => {
               (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMjAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWUyOTNiIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZpbGw9IiM2NDc0OGIiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
             }}
@@ -90,7 +90,7 @@ const App = () => {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background">
+    <div className="flex h-full w-full overflow-hidden bg-background">
       {/* Sidebar */}
       <div className="w-64 bg-card border-r border-slate-700/50 p-4 flex flex-col gap-4 z-10 hidden md:flex">
         <div className="flex items-center gap-3">
@@ -117,7 +117,7 @@ const App = () => {
       </div>
       
       {/* Main Content */}
-      <div className="flex-1 p-4 md:p-8 overflow-y-auto flex flex-col relative">
+      <div className="flex-1 p-4 md:p-8 overflow-y-auto min-h-0 flex flex-col relative">
         {activeTab === 'library' && (
           <div className="flex-1">
             <h2 className="text-2xl font-bold mb-6">Play Instantly</h2>
