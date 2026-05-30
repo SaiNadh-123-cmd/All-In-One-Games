@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Snake</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0f1a;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:sans-serif;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
+#wrap{text-align:center}
+canvas{display:block;margin:0 auto;border:2px solid #334155;border-radius:8px;background:#0f172a;max-width:95vw;max-height:70vh}
+#hud{display:flex;justify-content:space-between;padding:8px 4px;color:#94a3b8;font-size:14px;max-width:400px;margin:0 auto}
+#hud span{font-weight:700}
+.score{color:#eab308}
+#overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,.7);justify-content:center;align-items:center;flex-direction:column;gap:16px}
+#overlay.show{display:flex}
+#overlay h2{color:#f1f5f9;font-size:24px}
+#overlay p{color:#94a3b8;font-size:14px}
+#overlay button{padding:12px 32px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer}
+.controls{display:flex;flex-direction:column;align-items:center;gap:4px;margin-top:12px}
+.controls .row{display:flex;gap:4px}
+.controls button{width:56px;height:56px;border-radius:12px;border:1px solid rgba(71,85,105,.4);background:rgba(30,41,59,.8);color:#94a3b8;font-size:22px;cursor:pointer;touch-action:none;-webkit-tap-highlight-color:transparent}
+.controls button:active{background:rgba(59,130,246,.3);color:#60a5fa}
+@media(min-width:768px){.controls{display:none}}
+</style>
+</head>
+<body>
+<div id="wrap">
+<div id="hud"><span class="score">Score: <span id="score">0</span></span><span>Best: <span id="best">0</span></span></div>
+<div style="position:relative">
+<canvas id="gc" width="400" height="400"></canvas>
+<div id="overlay"><h2 id="ol-title">Snake</h2><p id="ol-msg">Eat food, grow longer!</p><button id="ol-btn">Play</button></div>
+</div>
+<div class="controls">
+<div class="row"><button data-dir="up">▲</button></div>
+<div class="row"><button data-dir="left">◀</button><button data-dir="down">▼</button><button data-dir="right">▶</button></div>
+</div>
+</div>
+<script>
+const c=document.getElementById('gc'),ctx=c.getContext('2d');
+const scoreEl=document.getElementById('score'),bestEl=document.getElementById('best');
+const overlay=document.getElementById('overlay'),olTitle=document.getElementById('ol-title'),olMsg=document.getElementById('ol-msg'),olBtn=document.getElementById('ol-btn');
+let best=parseInt(localStorage.getItem('snake_best')||'0');
+bestEl.textContent=best;
+let dir={x:1,y:0},nextDir={x:1,y:0},snake,tail,food,score,dead,win,loop;
+const S=20,COLS=20,ROWS=20;
+function init(){
+  snake=[{x:5,y:10},{x:4,y:10},{x:3,y:10}];dir={x:1,y:0};nextDir={x:1,y:0};
+  score=0;dead=false;win=false;scoreEl.textContent='0';spawnFood();
+}
+function spawnFood(){
+  let p;do{p={x:Math.floor(Math.random()*COLS),y:Math.floor(Math.random()*ROWS)}}
+  while(snake.some(s=>s.x===p.x&&s.y===p.y));food=p;
+}
+function update(){
+  if(dead||win) return;
+  dir={x:nextDir.x,y:nextDir.y};
+  const head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+  if(head.x<0||head.x>=COLS||head.y<0||head.y>=ROWS||snake.some(s=>s.x===head.x&&s.y===head.y)){
+    dead=true;gameOver();return;
+  }
+  snake.unshift(head);
+  if(head.x===food.x&&head.y===food.y){score++;scoreEl.textContent=score;spawnFood();if(snake.length===COLS*ROWS){win=true;gameOver();}}
+  else snake.pop();
+}
+function gameOver(){
+  clearInterval(loop);
+  if(score>best){best=score;bestEl.textContent=best;localStorage.setItem('snake_best',best.toString());}
+  overlay.classList.add('show');
+  if(win){olTitle.textContent='You Win!';olMsg.textContent=`Perfect score: ${score}`;}
+  else{olTitle.textContent='Game Over';olMsg.textContent=`Score: ${score}`;}
+  olBtn.textContent='Restart';
+}
+function draw(){
+  ctx.fillStyle='#0f172a';ctx.fillRect(0,0,400,400);
+  ctx.fillStyle='rgba(34,197,94,0.15)';
+  for(let i=0;i<COLS;i++)for(let j=0;j<ROWS;j++)if((i+j)%2===0)ctx.fillRect(i*S,j*S,S,S);
+  snake.forEach((s,i)=>{
+    ctx.fillStyle=i===0?'#22c55e':'#16a34a';
+    ctx.shadowColor=i===0?'#22c55e':'transparent';ctx.shadowBlur=i===0?10:0;
+    ctx.beginPath();ctx.roundRect(s.x*S+1,s.y*S+1,S-2,S-2,i===0?6:3);ctx.fill();
+  });ctx.shadowBlur=0;
+  ctx.fillStyle='#ef4444';ctx.shadowColor='#ef4444';ctx.shadowBlur=12;
+  ctx.beginPath();ctx.arc(food.x*S+S/2,food.y*S+S/2,6,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+}
+function step(){update();draw();}
+function setDir(d){
+  if(dead||win) return;
+  const map={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}};
+  const nd=map[d];if(!nd)return;
+  if(dir.x+nd.x!==0||dir.y+nd.y!==0)nextDir=nd;
+}
+function startGame(){
+  overlay.classList.remove('show');init();clearInterval(loop);loop=setInterval(step,130);
+}
+olBtn.addEventListener('click',startGame);
+document.querySelectorAll('.controls button[data-dir]').forEach(b=>{
+  b.addEventListener('click',()=>setDir(b.dataset.dir));
+  b.addEventListener('touchstart',e=>{e.preventDefault();setDir(b.dataset.dir);});
+});
+document.addEventListener('keydown',e=>{
+  const k={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right'}[e.key];
+  if(k){e.preventDefault();setDir(k);}
+});
+let ts;c.addEventListener('touchstart',e=>{ts=e.touches[0];},{passive:true});
+c.addEventListener('touchend',e=>{
+  if(!ts)return;const te=e.changedTouches[0];
+  const dx=te.clientX-ts.clientX,dy=te.clientY-ts.clientY;
+  if(Math.abs(dx)>Math.abs(dy))setDir(dx>0?'right':'left');
+  else setDir(dy>0?'down':'up');
+  ts=null;
+},{passive:true});
+// Polyfill roundRect
+if(!CanvasRenderingContext2D.prototype.roundRect)CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){if(r>w/2)r=w/2;if(r>h/2)r=h/2;this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);this.closePath()};
+init();overlay.classList.add('show');olTitle.textContent='Snake';olMsg.textContent='Eat food, grow longer! Avoid walls and yourself.';olBtn.textContent='Play';
+</script>
+</body>
+</html>

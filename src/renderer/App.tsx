@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { useNativeAdMob, useRewardedAd } from './hooks/useAdMob';
+import TouchControls from './TouchControls';
 
 /* ── Types ───────────────────────────────────────────────────── */
 interface Game {
@@ -14,6 +15,7 @@ interface Game {
   instructions: string;
   controls: string;
   howToPlay: string;
+  needsTouchControls?: boolean;
 }
 
 interface ScoreMap {
@@ -1014,7 +1016,7 @@ const App = () => {
               }}>Open in Browser</button>
             )}
           </div>
-          <div style={{ flex: 1, position: 'relative', background: '#000' }}>
+          <div style={{ flex: 1, position: 'relative', background: '#000', overflow: 'hidden' }}>
             {iframeError ? (
               <div style={{
                 position: 'absolute', inset: 0,
@@ -1035,18 +1037,25 @@ const App = () => {
                 }}>Open in Browser</button>
               </div>
             ) : (
-              <iframe
-                key={activeGame.id + '-' + Date.now()}
-                src={activeGame.play_url}
-                title={activeGame.name}
-                style={{
-                  position: 'absolute', inset: 0,
-                  width: '100%', height: '100%', border: 'none',
-                }}
-                allow="fullscreen; autoplay; keyboard"
-                sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups"
-                onError={handleIframeError}
-              />
+              <div style={{
+                position: 'absolute', inset: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <iframe
+                  key={activeGame.id + '-' + Date.now()}
+                  src={activeGame.play_url}
+                  title={activeGame.name}
+                  style={{
+                    width: '100%', height: '100%', border: 'none',
+                    maxWidth: isMobileDevice() ? '100%' : 960,
+                    maxHeight: '100%',
+                  }}
+                  allow="fullscreen; autoplay; keyboard"
+                  sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups"
+                  onError={handleIframeError}
+                />
+                <TouchControls visible={!!activeGame.needsTouchControls} />
+              </div>
             )}
           </div>
         </div>

@@ -11,7 +11,8 @@ async function getAdMob() {
     const mod = await import('@capacitor-community/admob');
     AdMobPlugin = mod.AdMob;
     return AdMobPlugin;
-  } catch {
+  } catch (e) {
+    console.warn('[AdMob] Failed to load @capacitor-community/admob:', e);
     return null;
   }
 }
@@ -26,7 +27,10 @@ export function useNativeAdMob(bannerAdId: string, enabled: boolean = true) {
     try {
       await admob.initialize();
       initialized.current = true;
-    } catch { /* ignore */ }
+      console.log('[AdMob] Initialized successfully');
+    } catch (e) {
+      console.warn('[AdMob] Initialization failed:', e);
+    }
   }, [enabled]);
 
   const showBanner = useCallback(async () => {
@@ -40,13 +44,18 @@ export function useNativeAdMob(bannerAdId: string, enabled: boolean = true) {
         margin: 0,
       });
       bannerReady = true;
-    } catch { /* ignore */ }
+      console.log('[AdMob] Banner shown');
+    } catch (e) {
+      console.warn('[AdMob] Failed to show banner:', e);
+    }
   }, [bannerAdId]);
 
   const hideBanner = useCallback(async () => {
     const admob = await getAdMob();
     if (!admob) return;
-    try { await admob.hideBanner(); } catch { /* ignore */ }
+    try { await admob.hideBanner(); } catch (e) {
+      console.warn('[AdMob] Failed to hide banner:', e);
+    }
   }, []);
 
   const removeBanner = useCallback(async () => {
@@ -55,7 +64,9 @@ export function useNativeAdMob(bannerAdId: string, enabled: boolean = true) {
     try {
       await admob.removeBanner();
       bannerReady = false;
-    } catch { /* ignore */ }
+    } catch (e) {
+      console.warn('[AdMob] Failed to remove banner:', e);
+    }
   }, []);
 
   useEffect(() => {
@@ -77,7 +88,10 @@ export function useRewardedAd(rewardAdId: string, enabled: boolean = true) {
     try {
       await admob.initialize();
       initialized.current = true;
-    } catch { /* ignore */ }
+      console.log('[AdMob] Rewarded init done');
+    } catch (e) {
+      console.warn('[AdMob] Rewarded init failed:', e);
+    }
   }, [enabled]);
 
   const prepareReward = useCallback(async () => {
@@ -86,8 +100,10 @@ export function useRewardedAd(rewardAdId: string, enabled: boolean = true) {
     try {
       await admob.prepareRewardVideoAd({ adId: rewardAdId });
       rewardedReady.current = true;
+      console.log('[AdMob] Reward video prepared');
       return admob;
-    } catch {
+    } catch (e) {
+      console.warn('[AdMob] Failed to prepare reward video:', e);
       return null;
     }
   }, [rewardAdId]);
@@ -101,8 +117,10 @@ export function useRewardedAd(rewardAdId: string, enabled: boolean = true) {
       }
       await admob.showRewardVideoAd();
       rewardedReady.current = false;
+      console.log('[AdMob] Reward video shown, user rewarded');
       return true;
-    } catch {
+    } catch (e) {
+      console.warn('[AdMob] Failed to show reward video:', e);
       rewardedReady.current = false;
       return false;
     }
