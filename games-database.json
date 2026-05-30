@@ -1,0 +1,128 @@
+[
+  {
+    "id": "clumsy-bird",
+    "name": "Clumsy Bird",
+    "description": "A Flappy Bird clone made with MelonJS. Tap to fly through obstacles!",
+    "genre": "Arcade",
+    "play_url": "https://ellisonleao.github.io/clumsy-bird/",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/clumsy-bird.png"
+  },
+  {
+    "id": "hextris",
+    "name": "Hextris",
+    "description": "An addictive fast-paced puzzle game inspired by Tetris with a hexagonal twist.",
+    "genre": "Puzzle",
+    "play_url": "https://hextris.io/",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/hextris.png"
+  },
+  {
+    "id": "pacman-canvas",
+    "name": "Pac-Man HTML5",
+    "description": "A faithful recreation of the classic Pac-Man arcade game using HTML5 Canvas.",
+    "genre": "Arcade",
+    "play_url": "https://pacman.platzh1rsch.ch/",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/pacman-canvas.png"
+  },
+  {
+    "id": "hexgl",
+    "name": "HexGL",
+    "description": "A futuristic HTML5 racing game built with Three.js. Race at high speed!",
+    "genre": "Racing",
+    "play_url": "https://hexgl.bkcore.com/play/",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/hexgl.png"
+  },
+  {
+    "id": "2048",
+    "name": "2048",
+    "description": "The wildly popular number puzzle game. Merge tiles to reach 2048!",
+    "genre": "Puzzle",
+    "play_url": "https://gabrielecirulli.github.io/2048/",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/2048.svg"
+  },
+  {
+    "id": "space-invaders",
+    "name": "Space Invaders",
+    "description": "A classic Space Invaders clone in HTML5. Defend Earth from aliens!",
+    "genre": "Shooting",
+    "play_url": "https://cykod.github.io/AlienInvasion/",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/space-invaders.svg"
+  },
+  {
+    "id": "snake",
+    "name": "Snake",
+    "description": "The classic Snake game. Eat food, grow longer, avoid walls!",
+    "genre": "Arcade",
+    "play_url": "https://www.mathsisfun.com/games/snake.html",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/snake.svg"
+  },
+  {
+    "id": "duckhunt",
+    "name": "Duck Hunt JS",
+    "description": "A JavaScript implementation of the classic NES Duck Hunt game.",
+    "genre": "Shooting",
+    "play_url": "https://duckhuntjs.com/",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/duckhunt.svg"
+  },
+  {
+    "id": "flappy-bird",
+    "name": "Flappy Bird",
+    "description": "A perfect recreation of Flappy Bird in Phaser.js. How far can you go?",
+    "genre": "Arcade",
+    "play_url": "https://hyspace.io/Flappy-Bird/",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/flappy-bird.svg"
+  },
+  {
+    "id": "custom-tetris",
+    "name": "Custom Tetris",
+    "description": "A customizable open-source Tetris implementation with many options.",
+    "genre": "Puzzle",
+    "play_url": "https://ondras.github.io/custom-tetris/",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/custom-tetris.svg"
+  },
+  {
+    "id": "minesweeper",
+    "name": "Minesweeper",
+    "description": "A faithful replica of the classic Minesweeper game. Clear the minefield!",
+    "genre": "Puzzle",
+    "play_url": "https://minesweeperonline.com/",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/minesweeper.png"
+  },
+  {
+    "id": "breakout",
+    "name": "Breakout",
+    "description": "The classic brick-breaking arcade game. Smash all the bricks!",
+    "genre": "Arcade",
+    "play_url": "https://www.mathsisfun.com/games/breakout.html",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/breakout.svg"
+  },
+  {
+    "id": "simcity",
+    "name": "Micropolis (SimCity)",
+    "description": "An HTML5 port of the original SimCity classic. Build your dream city!",
+    "genre": "Simulation",
+    "play_url": "http://micropolis.mostka.com/",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/simcity.png"
+  },
+  {
+    "id": "sudoku",
+    "name": "Sudoku",
+    "description": "A clean responsive HTML5 Sudoku game with multiple difficulty levels.",
+    "genre": "Puzzle",
+    "play_url": "https://sudoku.com/",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/sudoku.svg"
+  }
+]

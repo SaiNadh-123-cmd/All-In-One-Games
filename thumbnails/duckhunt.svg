@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200">
+  <rect width="400" height="200" fill="#0f172a"/>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="200" fill="url(#sky)"/>
+  <!-- Ground -->
+  <rect x="0" y="150" width="400" height="50" fill="#166534" opacity="0.5"/>
+  <!-- Bush -->
+  <ellipse cx="80" cy="155" rx="40" ry="20" fill="#15803d" opacity="0.6"/>
+  <ellipse cx="320" cy="155" rx="50" ry="22" fill="#15803d" opacity="0.6"/>
+  <!-- Cloud -->
+  <ellipse cx="280" cy="40" rx="35" ry="12" fill="#334155"/>
+  <ellipse cx="300" cy="38" rx="25" ry="10" fill="#334155"/>
+  <!-- Duck 1 -->
+  <g transform="translate(180, 60)">
+    <ellipse cx="0" cy="0" rx="18" ry="10" fill="#eab308"/>
+    <circle cx="-14" cy="-4" r="7" fill="#eab308"/>
+    <circle cx="-18" cy="-5" r="1.5" fill="#000"/>
+    <polygon points="-20,-8 -28,-6 -20,-4" fill="#f97316"/>
+    <path d="M-5,-10 Q-8,-20 0,-18 Q8,-20 5,-10" fill="#a16207" opacity="0.5"/>
+  </g>
+  <!-- Duck 2 (flying) -->
+  <g transform="translate(100, 100) scale(0.8)">
+    <ellipse cx="0" cy="0" rx="18" ry="10" fill="#eab308"/>
+    <circle cx="-14" cy="-4" r="7" fill="#eab308"/>
+    <circle cx="-18" cy="-5" r="1.5" fill="#000"/>
+    <polygon points="-20,-8 -28,-6 -20,-4" fill="#f97316"/>
+    <path d="M-5,-10 Q-8,-22 0,-20 Q8,-22 5,-10" fill="#a16207" opacity="0.5"/>
+  </g>
+  <!-- Crosshair -->
+  <circle cx="200" cy="80" r="15" fill="none" stroke="#ef4444" stroke-width="2" opacity="0.7"/>
+  <line x1="185" y1="80" x2="215" y2="80" stroke="#ef4444" stroke-width="1.5" opacity="0.7"/>
+  <line x1="200" y1="65" x2="200" y2="95" stroke="#ef4444" stroke-width="1.5" opacity="0.7"/>
+  <!-- Grass detail -->
+  <g stroke="#166534" stroke-width="1.5" opacity="0.4">
+    <line x1="30" y1="150" x2="28" y2="138"/>
+    <line x1="50" y1="150" x2="52" y2="140"/>
+    <line x1="350" y1="150" x2="348" y2="136"/>
+    <line x1="370" y1="150" x2="372" y2="142"/>
+  </g>
+  <text x="200" y="190" text-anchor="middle" fill="#64748b" font-family="sans-serif" font-size="11" opacity="0.7">DUCK HUNT</text>
+</svg>
