@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react'
 import { Capacitor } from '@capacitor/core';
 import { useNativeAdMob, useRewardedAd } from './hooks/useAdMob';
 import TouchControls from './TouchControls';
+import { PrivacyPolicy, PrivacyLink } from './PrivacyPolicy';
+import { useSupabaseScores } from './hooks/useSupabaseScores';
 
 /* ── Types ───────────────────────────────────────────────────── */
 interface Game {
@@ -457,11 +459,8 @@ const genreColors: Record<string, { bg: string; text: string; glow: string }> = 
   Arcade:      { bg: 'rgba(234,179,8,0.15)',  text: '#eab308',  glow: 'rgba(234,179,8,0.3)' },
   Puzzle:      { bg: 'rgba(168,85,247,0.15)',  text: '#a855f7',  glow: 'rgba(168,85,247,0.3)' },
   Shooting:    { bg: 'rgba(239,68,68,0.15)',   text: '#ef4444',  glow: 'rgba(239,68,68,0.3)' },
-  Racing:      { bg: 'rgba(34,197,94,0.15)',   text: '#22c55e',  glow: 'rgba(34,197,94,0.3)' },
-  Simulation:  { bg: 'rgba(59,130,246,0.15)',  text: '#3b82f6',  glow: 'rgba(59,130,246,0.3)' },
-  FPS:         { bg: 'rgba(239,68,68,0.15)',   text: '#ef4444',  glow: 'rgba(239,68,68,0.3)' },
 };
-const allGenres = ['Arcade', 'Puzzle', 'Shooting', 'Racing', 'Simulation', 'FPS'];
+const allGenres = ['Arcade', 'Puzzle', 'Shooting'];
 
 /* ── Ad Component ────────────────────────────────────────────── */
 const AdUnit = ({ style = {} }: { style?: React.CSSProperties }) => {
@@ -566,7 +565,7 @@ const ScoreBadge = ({ score }: { score: number }) => {
 };
 
 /* ── Continue / Reward Modal ─────────────────────────────────── */
-const ContinueModal = ({ game, onWatchAd, onClose, canWatch }: { game: Game; onWatchAd: () => void; onClose: () => void; canWatch: boolean }) => {
+const ContinueModal = ({ game, onWatchAd, onClose, canWatch, isNative }: { game: Game; onWatchAd: () => void; onClose: () => void; canWatch: boolean; isNative: boolean }) => {
   const gc = genreColors[game.genre] || { bg: 'rgba(100,116,139,0.15)', text: '#94a3b8' };
 
   return (
@@ -595,26 +594,38 @@ const ContinueModal = ({ game, onWatchAd, onClose, canWatch }: { game: Game; onW
         display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
         gap: 12, padding: 20,
       }}>
-        {canWatch ? (
-          <>
-            <p style={{ color: '#94a3b8', fontSize: 14, textAlign: 'center', margin: 0 }}>
-              Want to continue playing? Watch a short ad to respawn!
+        {isNative ? (
+          canWatch ? (
+            <>
+              <p style={{ color: '#94a3b8', fontSize: 14, textAlign: 'center', margin: 0 }}>
+                Want to continue playing? Watch a short ad to respawn!
+              </p>
+              <button onClick={onWatchAd} style={{
+                padding: '14px 36px',
+                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                color: '#fff', border: 'none', borderRadius: 12,
+                fontSize: 15, fontWeight: 700, cursor: 'pointer',
+                boxShadow: '0 4px 20px rgba(245,158,11,0.3)',
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+                <span>🎬</span> Watch Ad to Continue
+              </button>
+            </>
+          ) : (
+            <p style={{ color: '#64748b', fontSize: 13, textAlign: 'center', margin: 0 }}>
+              Come back later to continue with an ad.
             </p>
-            <button onClick={onWatchAd} style={{
-              padding: '14px 36px',
-              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-              color: '#fff', border: 'none', borderRadius: 12,
-              fontSize: 15, fontWeight: 700, cursor: 'pointer',
-              boxShadow: '0 4px 20px rgba(245,158,11,0.3)',
-              display: 'flex', alignItems: 'center', gap: 8,
-            }}>
-              <span>🎬</span> Watch Ad to Continue
-            </button>
-          </>
+          )
         ) : (
-          <p style={{ color: '#64748b', fontSize: 13, textAlign: 'center', margin: 0 }}>
-            Come back later to continue with an ad.
-          </p>
+          <button onClick={onWatchAd} style={{
+            padding: '14px 36px',
+            background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
+            color: '#fff', border: 'none', borderRadius: 12,
+            fontSize: 15, fontWeight: 700, cursor: 'pointer',
+            boxShadow: '0 4px 20px rgba(59,130,246,0.3)',
+          }}>
+            Play Again
+          </button>
         )}
       </div>
 
@@ -752,14 +763,17 @@ const App = () => {
   const [canWatchReward, setCanWatchReward] = useState(false);
 
   const [lastScore, setLastScore] = useState(0);
+  const [loadError, setLoadError] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const rewardAd = useRewardedAd(REWARD_AD_ID, Capacitor.isNativePlatform());
+  const { submitScore: submitSupabaseScore } = useSupabaseScores();
 
   useEffect(() => {
     setScores(loadScores());
     fetch('/games-database.json')
       .then(r => r.json())
       .then(data => { setGames(data); setLoading(false); })
-      .catch(() => setLoading(false));
+      .catch(() => { setLoading(false); setLoadError(true); });
   }, []);
 
   const filtered = useMemo(() => {
@@ -815,10 +829,12 @@ const App = () => {
 
   const handleSetScore = (gameId: string, score: number) => {
     const updated = { ...scores };
-    if (!updated[gameId] || score > updated[gameId]) {
+    const isNewBest = !updated[gameId] || score > updated[gameId];
+    if (isNewBest) {
       updated[gameId] = score;
       setScores(updated);
       saveScores(updated);
+      submitSupabaseScore(gameId, score);
     }
     setLastScore(score);
   };
@@ -862,10 +878,10 @@ const App = () => {
             }}>G</div>
             <div>
               <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, background: 'linear-gradient(135deg, #f1f5f9, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                GameVault
+                All-In-One Games
               </h1>
               <p style={{ margin: '2px 0 0', fontSize: 12, color: '#64748b', fontWeight: 500 }}>
-                {isMobileDevice() ? 'Tap any game, read instructions, then play!' : 'Play free browser games instantly'}
+                {isMobileDevice() ? 'Tap any game, read instructions, then play!' : 'Play browser games offline'}
               </p>
             </div>
           </div>
@@ -916,7 +932,12 @@ const App = () => {
       </div>
 
       <main style={{ position: 'relative', zIndex: 2, maxWidth: 1200, margin: '0 auto', padding: '28px 24px 60px' }}>
-        {!loading && (
+        {loadError && (
+          <div style={{ margin: '0 0 20px', padding: '12px 16px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, color: '#fca5a5', fontSize: 13, textAlign: 'center' }}>
+            Failed to load games database. Please ensure the app is properly installed.
+          </div>
+        )}
+        {!loading && !loadError && (
           <p style={{ margin: '0 0 20px', fontSize: 13, color: '#64748b' }}>
             {filtered.length} {filtered.length === 1 ? 'game' : 'games'} found
             {selectedGenre && <span> in <span style={{ color: (genreColors[selectedGenre] || {}).text || '#94a3b8' }}>{selectedGenre}</span></span>}
@@ -956,11 +977,12 @@ const App = () => {
       }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontWeight: 700, fontSize: 14, color: '#475569' }}>GameVault</span>
+            <span style={{ fontWeight: 700, fontSize: 14, color: '#475569' }}>All-In-One Games</span>
             <span style={{ color: '#334155', fontSize: 12 }}>•</span>
-            <span style={{ color: '#475569', fontSize: 12 }}>Free browser games</span>
+            <span style={{ color: '#475569', fontSize: 12 }}>Play games offline</span>
           </div>
-          <div style={{ display: 'flex', gap: 16 }}>
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+            <PrivacyLink onOpen={() => setShowPrivacy(true)} />
             {Object.keys(scores).length > 0 && (
               <span style={{ color: '#475569', fontSize: 12 }}>
                 {Object.keys(scores).length} game{Object.keys(scores).length !== 1 && 's'} played
@@ -1067,8 +1089,11 @@ const App = () => {
           onWatchAd={handleWatchAd}
           onClose={handleCloseContinue}
           canWatch={canWatchReward}
+          isNative={Capacitor.isNativePlatform()}
         />
       )}
+
+      {showPrivacy && <PrivacyPolicy onClose={() => setShowPrivacy(false)} />}
 
       <style>{`
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
