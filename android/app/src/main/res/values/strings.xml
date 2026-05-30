@@ -4,4 +4,5 @@
     <string name="title_activity_main">All-In-One Games</string>
     <string name="package_name">com.allinone.games</string>
     <string name="custom_url_scheme">com.allinone.games</string>
+    <string name="admob_app_id">ca-app-pub-5224273312267357~7724673850</string>
 </resources>

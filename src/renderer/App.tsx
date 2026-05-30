@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import { Capacitor } from '@capacitor/core';
+import { useNativeAdMob } from './hooks/useAdMob';
 
 /* ── Types ───────────────────────────────────────────────────── */
 interface Game {
@@ -168,14 +170,30 @@ const BackgroundAnimation = () => {
 };
 
 /* ── Ad Component ────────────────────────────────────────────── */
+const BANNER_AD_ID = 'ca-app-pub-5224273312267357/9652833196';
+
 let adCount = 0;
 const AdUnit = ({ style = {} }: { style?: React.CSSProperties }) => {
   const id = useRef(`ad-${++adCount}`);
+  const isNative = Capacitor.isNativePlatform();
+
+  const { showBanner, removeBanner, isNative: _isNative } = useNativeAdMob(BANNER_AD_ID, isNative);
+
   useEffect(() => {
-    try {
-      ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
-    } catch { /* ignore */ }
-  }, []);
+    if (isNative) {
+      showBanner();
+      return () => { removeBanner(); };
+    } else {
+      try {
+        ((window as any).adsbygoogle = (window as any).adsbygoogle || []).push({});
+      } catch { /* ignore */ }
+    }
+  }, [isNative, showBanner, removeBanner]);
+
+  if (isNative) {
+    return null;
+  }
+
   return (
     <div id={id.current} style={{ width: '100%', ...style }}>
       <ins className="adsbygoogle" style={{ display: 'block', width: '100%' }}
