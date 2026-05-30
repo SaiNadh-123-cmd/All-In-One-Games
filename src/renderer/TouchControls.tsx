@@ -6,70 +6,70 @@ interface TouchControlsProps {
 }
 
 const TouchControls: React.FC<TouchControlsProps> = ({ visible, onGameFrame }) => {
-  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const pressedKeys = useRef<Set<string>>(new Set());
 
-  const getIframe = useCallback(() => {
-    if (iframeRef.current) return iframeRef.current;
+  const getDoc = useCallback(() => {
     const iframe = document.querySelector<HTMLIFrameElement>('iframe[title]');
-    if (iframe) iframeRef.current = iframe;
-    return iframe;
+    return iframe?.contentDocument || iframe?.contentWindow?.document || null;
   }, []);
 
-  useEffect(() => {
-    if (visible) {
-      iframeRef.current = document.querySelector<HTMLIFrameElement>('iframe[title]');
-      onGameFrame?.(iframeRef.current);
-    } else {
-      iframeRef.current = null;
-    }
-  }, [visible, onGameFrame]);
+  const dispatchKey = useCallback((key: string, type: 'keydown' | 'keyup') => {
+    const doc = getDoc();
+    if (!doc) return;
+    const keyCode = key === ' ' ? 32 : key === 'ArrowLeft' ? 37 : key === 'ArrowUp' ? 38 : key === 'ArrowRight' ? 39 : key === 'ArrowDown' ? 40 : 0;
+    const ev = new KeyboardEvent(type, {
+      key, code: key === ' ' ? 'Space' : key,
+      keyCode, which: keyCode,
+      bubbles: true, cancelable: true,
+    });
+    doc.dispatchEvent(ev);
+  }, [getDoc]);
 
   useEffect(() => {
-    if (!visible) return;
+    if (!visible) { pressedKeys.current.clear(); return; }
 
-    const dispatchKey = (key: string) => {
-      const iframe = getIframe();
-      if (!iframe) return;
-      iframe.contentWindow?.dispatchEvent(new KeyboardEvent('keydown', {
-        key, bubbles: true, cancelable: true,
-        ...(key === ' ' ? { keyCode: 32, which: 32 } : {}),
-        ...(key === 'ArrowLeft' ? { keyCode: 37, which: 37 } : {}),
-        ...(key === 'ArrowUp' ? { keyCode: 38, which: 38 } : {}),
-        ...(key === 'ArrowRight' ? { keyCode: 39, which: 39 } : {}),
-        ...(key === 'ArrowDown' ? { keyCode: 40, which: 40 } : {}),
-      }));
-      setTimeout(() => {
-        iframe.contentWindow?.dispatchEvent(new KeyboardEvent('keyup', {
-          key, bubbles: true, cancelable: true,
-        }));
-      }, 100);
+    const handleStart = (e: Event, key: string) => {
+      e.preventDefault();
+      if (pressedKeys.current.has(key)) return;
+      pressedKeys.current.add(key);
+      dispatchKey(key, 'keydown');
     };
 
-    const handleKey = (e: MouseEvent, key: string) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dispatchKey(key);
+    const handleEnd = (key: string) => {
+      if (!pressedKeys.current.has(key)) return;
+      pressedKeys.current.delete(key);
+      dispatchKey(key, 'keyup');
     };
 
     const btns = document.querySelectorAll<HTMLButtonElement>('.tc-btn');
-    const handlers: Array<{ el: HTMLButtonElement; handler: (e: MouseEvent) => void }> = [];
+    const handlers: Array<{ el: HTMLButtonElement; key: string; onStart: (e: Event) => void; onEnd: () => void }> = [];
 
     btns.forEach(btn => {
       const key = btn.dataset.key;
       if (!key) return;
-      const handler = (e: MouseEvent) => handleKey(e, key);
-      btn.addEventListener('mousedown', handler);
-      btn.addEventListener('touchstart', handler as any, { passive: false });
-      handlers.push({ el: btn, handler });
+      const onStart = (e: Event) => handleStart(e, key);
+      const onEnd = () => handleEnd(key);
+      btn.addEventListener('mousedown', onStart);
+      btn.addEventListener('mouseup', onEnd);
+      btn.addEventListener('mouseleave', onEnd);
+      btn.addEventListener('touchstart', onStart, { passive: false });
+      btn.addEventListener('touchend', onEnd);
+      btn.addEventListener('touchcancel', onEnd);
+      handlers.push({ el: btn, key, onStart, onEnd });
     });
 
     return () => {
-      handlers.forEach(({ el, handler }) => {
-        el.removeEventListener('mousedown', handler);
-        el.removeEventListener('touchstart', handler as any);
+      handlers.forEach(({ el, onStart, onEnd }) => {
+        el.removeEventListener('mousedown', onStart);
+        el.removeEventListener('mouseup', onEnd);
+        el.removeEventListener('mouseleave', onEnd);
+        el.removeEventListener('touchstart', onStart as any);
+        el.removeEventListener('touchend', onEnd);
+        el.removeEventListener('touchcancel', onEnd);
       });
+      pressedKeys.current.clear();
     };
-  }, [visible, getIframe]);
+  }, [visible, dispatchKey]);
 
   if (!visible) return null;
 

@@ -479,15 +479,18 @@ const AdUnit = ({ style = {} }: { style?: React.CSSProperties }) => {
     }
   }, [isNative, showBanner, removeBanner]);
 
-  if (isNative) return null;
-
   return (
-    <div id={id.current} style={{ width: '100%', ...style }}>
-      <ins className="adsbygoogle" style={{ display: 'block', width: '100%' }}
-        data-ad-client="ca-pub-5224273312267357"
-        data-ad-slot="9181079962"
-        data-ad-format="auto"
-        data-full-width-responsive="true" />
+    <div id={isNative ? undefined : id.current} style={{
+      width: '100%', minHeight: isNative ? 1 : undefined,
+      ...style,
+    }}>
+      {!isNative && (
+        <ins className="adsbygoogle" style={{ display: 'block', width: '100%' }}
+          data-ad-client="ca-pub-5224273312267357"
+          data-ad-slot="9181079962"
+          data-ad-format="auto"
+          data-full-width-responsive="true" />
+      )}
     </div>
   );
 };
@@ -923,13 +926,15 @@ const App = () => {
         </div>
       </header>
 
-      <div style={{ position: 'relative', zIndex: 2, padding: '8px 24px', borderBottom: '1px solid rgba(71,85,105,0.15)', background: 'rgba(10,15,26,0.5)', backdropFilter: 'blur(8px)' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', minHeight: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ width: '100%', maxWidth: 728, minHeight: 60, background: 'rgba(30,41,59,0.2)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: 11 }}>
-            <AdUnit />
+      {!Capacitor.isNativePlatform() && (
+        <div style={{ position: 'relative', zIndex: 2, padding: '8px 24px', borderBottom: '1px solid rgba(71,85,105,0.15)', background: 'rgba(10,15,26,0.5)', backdropFilter: 'blur(8px)' }}>
+          <div style={{ maxWidth: 1200, margin: '0 auto', minHeight: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '100%', maxWidth: 728, background: 'rgba(30,41,59,0.2)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <AdUnit />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <main style={{ position: 'relative', zIndex: 2, maxWidth: 1200, margin: '0 auto', padding: '28px 24px 60px' }}>
         {loadError && (
@@ -955,8 +960,8 @@ const App = () => {
               : filtered.map((game, i) => (
                   <React.Fragment key={game.id}>
                     <GameCard game={game} onPlay={() => handlePlay(game)} bestScore={scores[game.id] || 0} />
-                    {adPositions.includes(i + 1) && (
-                      <div style={{ gridColumn: '1 / -1', minHeight: 60, background: 'rgba(30,41,59,0.15)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {adPositions.includes(i + 1) && !Capacitor.isNativePlatform() && (
+                      <div style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <div style={{ width: '100%', maxWidth: 728 }}>
                           <AdUnit />
                         </div>
@@ -1063,19 +1068,25 @@ const App = () => {
                 position: 'absolute', inset: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <iframe
-                  key={activeGame.id + '-' + Date.now()}
-                  src={activeGame.play_url}
-                  title={activeGame.name}
-                  style={{
-                    width: '100%', height: '100%', border: 'none',
-                    maxWidth: isMobileDevice() ? '100%' : 960,
-                    maxHeight: '100%',
-                  }}
-                  allow="fullscreen; autoplay; keyboard"
-                  sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups"
-                  onError={handleIframeError}
-                />
+                <div style={{
+                  width: '100%', maxWidth: isMobileDevice() ? '100%' : 960,
+                  aspectRatio: '16/9',
+                  maxHeight: '100%',
+                  position: 'relative',
+                }}>
+                  <iframe
+                    key={activeGame.id + '-' + Date.now()}
+                    src={activeGame.play_url}
+                    title={activeGame.name}
+                    style={{
+                      position: 'absolute', inset: 0,
+                      width: '100%', height: '100%', border: 'none',
+                    }}
+                    allow="fullscreen; autoplay; keyboard"
+                    sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups"
+                    onError={handleIframeError}
+                  />
+                </div>
                 <TouchControls visible={!!activeGame.needsTouchControls} />
               </div>
             )}
