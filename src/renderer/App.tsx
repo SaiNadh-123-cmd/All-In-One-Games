@@ -57,70 +57,351 @@ const BackgroundAnimation = () => {
     canvas.width = w;
     canvas.height = h;
 
-    interface Star { x: number; y: number; r: number; a: number; da: number; speed: number; }
+    /* ── Star layers (parallax) ── */
+    interface Star { x: number; y: number; r: number; a: number; da: number; speed: number; layer: number; }
     const stars: Star[] = [];
-    for (let i = 0; i < 250; i++) {
+    for (let i = 0; i < 400; i++) {
+      const layer = Math.random();
+      const l = layer < 0.5 ? 0 : layer < 0.8 ? 1 : 2;
       stars.push({
         x: Math.random() * w, y: Math.random() * h,
-        r: Math.random() * 1.8 + 0.3,
-        a: Math.random(), da: (Math.random() - 0.5) * 0.02,
-        speed: Math.random() * 0.15 + 0.02,
+        r: l === 0 ? Math.random() * 0.6 + 0.2 : l === 1 ? Math.random() * 1.2 + 0.4 : Math.random() * 2 + 0.6,
+        a: Math.random() * Math.PI * 2,
+        da: (Math.random() - 0.5) * 0.01,
+        speed: l === 0 ? 0.05 : l === 1 ? 0.15 : 0.35,
+        layer: l,
       });
     }
 
+    /* ── Nebula clouds ── */
+    interface Nebula { x: number; y: number; r: number; color: string; speedX: number; speedY: number; alpha: number; }
+    const nebulae: Nebula[] = [
+      { x: w * 0.2, y: h * 0.3, r: 200, color: '#3b82f6', speedX: 0.08, speedY: 0.04, alpha: 0.04 },
+      { x: w * 0.7, y: h * 0.6, r: 250, color: '#8b5cf6', speedX: -0.06, speedY: 0.05, alpha: 0.035 },
+      { x: w * 0.5, y: h * 0.2, r: 180, color: '#ec4899', speedX: 0.05, speedY: -0.03, alpha: 0.03 },
+      { x: w * 0.8, y: h * 0.8, r: 220, color: '#06b6d4', speedX: -0.04, speedY: -0.06, alpha: 0.025 },
+    ];
+
+    /* ── Enemy ships ── */
+    interface EnemyShip {
+      x: number; y: number; vx: number; vy: number; w: number; h: number;
+      angle: number; targetAngle: number; timer: number; color: string; health: number;
+      fireTimer: number; fireRate: number; flash: number;
+    }
+
+    const shipColors = ['#ef4444', '#f59e0b', '#10b981', '#ec4899', '#06b6d4', '#f97316'];
+    const enemyShips: EnemyShip[] = [];
+    for (let i = 0; i < 5; i++) {
+      const side = Math.floor(Math.random() * 4);
+      let x: number, y: number;
+      if (side === 0) { x = -80; y = Math.random() * h; }
+      else if (side === 1) { x = w + 80; y = Math.random() * h; }
+      else if (side === 2) { x = Math.random() * w; y = -60; }
+      else { x = Math.random() * w; y = h + 60; }
+      enemyShips.push({
+        x, y,
+        vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5,
+        w: 18 + Math.random() * 14, h: 12 + Math.random() * 10,
+        angle: Math.random() * Math.PI * 2,
+        targetAngle: Math.random() * Math.PI * 2,
+        timer: Math.random() * 200,
+        color: shipColors[i % shipColors.length],
+        health: 1,
+        fireTimer: Math.random() * 100,
+        fireRate: 60 + Math.random() * 100,
+        flash: 0,
+      });
+    }
+
+    /* ── Projectiles ── */
+    interface Projectile {
+      x: number; y: number; vx: number; vy: number;
+      color: string; life: number; maxLife: number; r: number; fromPlayer: boolean;
+    }
+    const projectiles: Projectile[] = [];
+
+    /* ── Explosions ── */
+    interface Explosion {
+      x: number; y: number; particles: { x: number; y: number; vx: number; vy: number; life: number; maxLife: number; color: string; r: number }[];
+    }
+    const explosions: Explosion[] = [];
+
+    /* ── Shooting stars ── */
     interface ShootingStar { x: number; y: number; vx: number; vy: number; life: number; maxLife: number; }
     let shootingStars: ShootingStar[] = [];
     let nextShootTimer = 0;
 
+    /* ── Resize ── */
     const resize = () => {
       w = window.innerWidth; h = window.innerHeight;
       canvas.width = w; canvas.height = h;
     };
     window.addEventListener('resize', resize);
 
+    /* ── Mouse ── */
     const onMouse = (e: MouseEvent) => {
       mouseRef.current = { x: e.clientX, y: e.clientY };
     };
     window.addEventListener('mousemove', onMouse);
 
+    /* ── Draw ship shape ── */
+    function drawShip(ctx: CanvasRenderingContext2D, x: number, y: number, angle: number, size: number, color: string, flash: number) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+
+      const s = size;
+      const bodyColor = flash > 0 ? '#fff' : color;
+
+      ctx.shadowColor = flash > 0 ? '#fff' : color;
+      ctx.shadowBlur = flash > 0 ? 20 : 8;
+
+      ctx.beginPath();
+      ctx.moveTo(s * 1, 0);
+      ctx.lineTo(s * -0.6, s * -0.5);
+      ctx.lineTo(s * -0.3, 0);
+      ctx.lineTo(s * -0.6, s * 0.5);
+      ctx.closePath();
+      ctx.fillStyle = bodyColor;
+      ctx.fill();
+
+      ctx.shadowBlur = 0;
+
+      ctx.beginPath();
+      ctx.moveTo(s * 0.6, 0);
+      ctx.lineTo(s * -0.2, s * -0.35);
+      ctx.lineTo(s * -0.1, 0);
+      ctx.lineTo(s * -0.2, s * 0.35);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(s * 0.15, 0, s * 0.08, 0, Math.PI * 2);
+      ctx.fillStyle = flash > 0 ? '#fff' : 'rgba(200,230,255,0.9)';
+      ctx.fill();
+
+      ctx.shadowColor = '#ff6b35';
+      ctx.shadowBlur = 15;
+      ctx.beginPath();
+      ctx.moveTo(s * -0.6, s * -0.1);
+      ctx.lineTo(s * -1.2, s * -0.2);
+      ctx.lineTo(s * -1.2, s * 0.2);
+      ctx.lineTo(s * -0.6, s * 0.1);
+      ctx.closePath();
+      ctx.fillStyle = flash > 0 ? '#ffaa44' : '#ff6b35';
+      ctx.globalAlpha = 0.3 + Math.random() * 0.4;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.shadowBlur = 0;
+
+      ctx.restore();
+    }
+
+    /* ── Create explosion ── */
+    function createExplosion(x: number, y: number, color: string, count: number) {
+      const particles: Explosion['particles'][0][] = [];
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1 + Math.random() * 4;
+        const colors = [color, '#ff6b35', '#ffd700', '#fff', '#ff4444'];
+        particles.push({
+          x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+          life: 1, maxLife: 20 + Math.random() * 30,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          r: 1.5 + Math.random() * 3,
+        });
+      }
+      explosions.push({ x, y, particles });
+    }
+
+    /* ── Main draw loop ── */
     let animId: number;
     const draw = () => {
       ctx.clearRect(0, 0, w, h);
+
+      /* ── Nebula ── */
+      for (const n of nebulae) {
+        n.x += n.speedX; n.y += n.speedY;
+        if (n.x < -n.r) n.x = w + n.r; if (n.x > w + n.r) n.x = -n.r;
+        if (n.y < -n.r) n.y = h + n.r; if (n.y > h + n.r) n.y = -n.r;
+        const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r);
+        grad.addColorStop(0, n.color + Math.round(n.alpha * 255).toString(16).padStart(2, '0'));
+        grad.addColorStop(0.5, n.color + Math.round(n.alpha * 0.5 * 255).toString(16).padStart(2, '0'));
+        grad.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad;
+        ctx.fillRect(n.x - n.r, n.y - n.r, n.r * 2, n.r * 2);
+      }
+
+      /* ── Stars ── */
       for (const s of stars) {
         s.a += s.da; s.y += s.speed;
         if (s.y > h + 5) { s.y = -5; s.x = Math.random() * w; }
+        const twinkle = 0.3 + Math.abs(Math.sin(s.a)) * 0.7;
         ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(200,220,255,${0.2 + Math.abs(Math.sin(s.a)) * 0.6})`;
+        ctx.fillStyle = `rgba(255,255,255,${twinkle})`;
         ctx.fill();
       }
+
+      /* ── Enemy AI ── */
+      const playerX = shipPosRef.current.x;
+      const playerY = shipPosRef.current.y;
+
+      for (const ship of enemyShips) {
+        ship.timer--;
+        ship.fireTimer--;
+        if (ship.flash > 0) ship.flash--;
+
+        if (ship.timer <= 0) {
+          ship.targetAngle = Math.random() * Math.PI * 2;
+          ship.vx = Math.cos(ship.targetAngle) * (0.2 + Math.random() * 0.4);
+          ship.vy = Math.sin(ship.targetAngle) * (0.2 + Math.random() * 0.4);
+          ship.timer = 100 + Math.random() * 200;
+        }
+
+        ship.angle += (ship.targetAngle - ship.angle) * 0.02;
+        ship.x += ship.vx; ship.y += ship.vy;
+
+        if (ship.x < -100) { ship.x = -100; ship.vx *= -1; ship.targetAngle = Math.atan2(ship.vy, -ship.vx); }
+        if (ship.x > w + 100) { ship.x = w + 100; ship.vx *= -1; ship.targetAngle = Math.atan2(ship.vy, -ship.vx); }
+        if (ship.y < -80) { ship.y = -80; ship.vy *= -1; ship.targetAngle = Math.atan2(-ship.vy, ship.vx); }
+        if (ship.y > h + 80) { ship.y = h + 80; ship.vy *= -1; ship.targetAngle = Math.atan2(-ship.vy, ship.vx); }
+
+        /* Shoot at player */
+        if (ship.fireTimer <= 0 && playerX > 0 && playerY > 0) {
+          const dx = playerX - ship.x;
+          const dy = playerY - ship.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 600) {
+            const speed = 2.5 + Math.random() * 0.5;
+            const angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * 0.15;
+            projectiles.push({
+              x: ship.x, y: ship.y,
+              vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+              color: ship.color, life: 1, maxLife: 80,
+              r: 2.5, fromPlayer: false,
+            });
+          }
+          ship.fireTimer = ship.fireRate * (0.5 + Math.random() * 0.5);
+        }
+
+        drawShip(ctx, ship.x, ship.y, ship.angle + Math.PI / 2, ship.w / 10, ship.color, ship.flash);
+      }
+
+      /* ── Player ship shoots back ── */
+      const ms = mouseRef.current;
+      if (ms.x > 0 && ms.y > 0 && Math.random() < 0.02) {
+        const target = enemyShips.reduce((closest, s) => {
+          const dx = s.x - playerX; const dy = s.y - playerY;
+          const dist = dx * dx + dy * dy;
+          return dist < closest.dist ? { ship: s, dist } : closest;
+        }, { ship: null as EnemyShip | null, dist: Infinity });
+        if (target.ship && target.dist < 500 * 500) {
+          const dx = target.ship.x - playerX;
+          const dy = target.ship.y - playerY;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const speed = 4;
+          projectiles.push({
+            x: playerX, y: playerY,
+            vx: (dx / dist) * speed, vy: (dy / dist) * speed,
+            color: '#60a5fa', life: 1, maxLife: 60,
+            r: 2, fromPlayer: true,
+          });
+        }
+      }
+
+      /* ── Projectiles ── */
+      for (let i = projectiles.length - 1; i >= 0; i--) {
+        const p = projectiles[i];
+        p.x += p.vx; p.y += p.vy; p.life -= 1 / p.maxLife;
+        if (p.life <= 0 || p.x < -50 || p.x > w + 50 || p.y < -50 || p.y > h + 50) {
+          projectiles.splice(i, 1);
+          continue;
+        }
+        ctx.shadowColor = p.fromPlayer ? '#60a5fa' : p.color;
+        ctx.shadowBlur = 15;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = p.fromPlayer ? '#60a5fa' : p.color;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 0.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+
+        /* hit detection */
+        let removed = false;
+        if (!p.fromPlayer) {
+          const dx = p.x - playerX; const dy = p.y - playerY;
+          if (Math.sqrt(dx * dx + dy * dy) < 20) {
+            createExplosion(p.x, p.y, '#60a5fa', 15);
+            projectiles.splice(i, 1);
+            removed = true;
+          }
+        } else {
+          for (const ship of enemyShips) {
+            const dx = p.x - ship.x; const dy = p.y - ship.y;
+            if (Math.sqrt(dx * dx + dy * dy) < ship.w / 2) {
+              ship.flash = 8;
+              createExplosion(p.x, p.y, ship.color, 12);
+              projectiles.splice(i, 1);
+              removed = true;
+              break;
+            }
+          }
+        }
+      }
+
+      /* ── Explosions ── */
+      for (let i = explosions.length - 1; i >= 0; i--) {
+        const exp = explosions[i];
+        let alive = false;
+        for (const pt of exp.particles) {
+          pt.x += pt.vx; pt.y += pt.vy;
+          pt.vx *= 0.98; pt.vy *= 0.98;
+          pt.life -= 1 / pt.maxLife;
+          if (pt.life > 0) {
+            alive = true;
+            ctx.globalAlpha = pt.life;
+            ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.r * pt.life, 0, Math.PI * 2);
+            ctx.fillStyle = pt.color;
+            ctx.fill();
+          }
+        }
+        ctx.globalAlpha = 1;
+        if (!alive) explosions.splice(i, 1);
+      }
+
+      /* ── Shooting stars ── */
       nextShootTimer--;
-      if (nextShootTimer <= 0 && shootingStars.length < 3) {
-        const sx = Math.random() * w * 0.8 + w * 0.1;
-        const sy = Math.random() * h * 0.3;
-        const angle = Math.PI * 0.15 + Math.random() * Math.PI * 0.15;
-        const spd = 4 + Math.random() * 6;
+      if (nextShootTimer <= 0 && shootingStars.length < 2) {
+        const sx = Math.random() * w * 0.6 + w * 0.2;
+        const sy = Math.random() * h * 0.2;
+        const angle = Math.PI * 0.2 + Math.random() * Math.PI * 0.1;
+        const spd = 6 + Math.random() * 8;
         shootingStars.push({
           x: sx, y: sy, vx: Math.cos(angle) * spd, vy: Math.sin(angle) * spd,
-          life: 1, maxLife: 40 + Math.random() * 40,
+          life: 1, maxLife: 30 + Math.random() * 30,
         });
-        nextShootTimer = 80 + Math.random() * 200;
+        nextShootTimer = 100 + Math.random() * 300;
       }
       shootingStars = shootingStars.filter(s => {
         s.x += s.vx; s.y += s.vy; s.life -= 1 / s.maxLife;
         if (s.life <= 0 || s.x > w + 20 || s.y > h + 20) return false;
-        const tail = 20;
+        const tail = 30;
         const grad = ctx.createLinearGradient(s.x, s.y, s.x - s.vx * tail, s.y - s.vy * tail);
-        grad.addColorStop(0, `rgba(200,220,255,${s.life})`);
-        grad.addColorStop(1, 'rgba(200,220,255,0)');
+        grad.addColorStop(0, `rgba(255,255,255,${s.life})`);
+        grad.addColorStop(1, 'rgba(255,255,255,0)');
         ctx.beginPath(); ctx.moveTo(s.x, s.y);
         ctx.lineTo(s.x - s.vx * tail, s.y - s.vy * tail);
-        ctx.strokeStyle = grad; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.strokeStyle = grad; ctx.lineWidth = 2; ctx.stroke();
         return true;
       });
+
       animId = requestAnimationFrame(draw);
     };
     animId = requestAnimationFrame(draw);
 
+    /* ── Player ship DOM animation ── */
     const ship = shipRef.current;
     let shipAnimId: number;
     const moveShip = () => {
