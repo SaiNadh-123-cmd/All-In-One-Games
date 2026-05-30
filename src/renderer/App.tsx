@@ -457,8 +457,9 @@ const genreColors: Record<string, { bg: string; text: string; glow: string }> = 
   Shooting:    { bg: 'rgba(239,68,68,0.15)',   text: '#ef4444',  glow: 'rgba(239,68,68,0.3)' },
   Racing:      { bg: 'rgba(34,197,94,0.15)',   text: '#22c55e',  glow: 'rgba(34,197,94,0.3)' },
   Simulation:  { bg: 'rgba(59,130,246,0.15)',  text: '#3b82f6',  glow: 'rgba(59,130,246,0.3)' },
+  FPS:         { bg: 'rgba(239,68,68,0.15)',   text: '#ef4444',  glow: 'rgba(239,68,68,0.3)' },
 };
-const allGenres = ['Arcade', 'Puzzle', 'Shooting', 'Racing', 'Simulation'];
+const allGenres = ['Arcade', 'Puzzle', 'Shooting', 'Racing', 'Simulation', 'FPS'];
 
 /* ── Ad Component ────────────────────────────────────────────── */
 const AdUnit = ({ style = {} }: { style?: React.CSSProperties }) => {

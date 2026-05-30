@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200">
+  <rect width="400" height="200" fill="#0f172a"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="200" fill="url(#bg)"/>
+  <!-- DOOM style corridor -->
+  <rect x="100" y="30" width="200" height="140" fill="#1e293b" rx="2" opacity="0.5"/>
+  <rect x="60" y="50" width="30" height="100" fill="#334155" rx="2" opacity="0.6"/>
+  <rect x="310" y="50" width="30" height="100" fill="#334155" rx="2" opacity="0.6"/>
+  <!-- Floor -->
+  <rect x="100" y="130" width="200" height="40" fill="#450a0a" opacity="0.4"/>
+  <rect x="100" y="130" width="200" height="2" fill="#991b1b" opacity="0.5"/>
+  <!-- Green armor -->
+  <rect x="175" y="100" width="18" height="24" fill="#166534" rx="2" opacity="0.8"/>
+  <rect x="179" y="96" width="10" height="6" fill="#166534" rx="1" opacity="0.8"/>
+  <!-- Red key -->
+  <rect x="210" y="105" width="8" height="14" fill="#dc2626" rx="1" opacity="0.8"/>
+  <rect x="208" y="103" width="12" height="4" fill="#dc2626" rx="1" opacity="0.8"/>
+  <!-- Demon face -->
+  <g transform="translate(200, 55)">
+    <rect x="-14" y="-10" width="28" height="20" fill="#991b1b" rx="4" opacity="0.7"/>
+    <circle cx="-6" cy="-4" r="3" fill="#fca5a5" opacity="0.8"/>
+    <circle cx="6" cy="-4" r="3" fill="#fca5a5" opacity="0.8"/>
+    <circle cx="-6" cy="-4" r="1.5" fill="#7f1d1d"/>
+    <circle cx="6" cy="-4" r="1.5" fill="#7f1d1d"/>
+    <path d="M-5,3 Q0,8 5,3" fill="none" stroke="#7f1d1d" stroke-width="1.5" opacity="0.8"/>
+  </g>
+  <text x="200" y="185" text-anchor="middle" fill="#64748b" font-family="sans-serif" font-size="11" opacity="0.7">DWASM - DOOM</text>
+</svg>

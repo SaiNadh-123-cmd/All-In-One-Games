@@ -166,5 +166,65 @@
     "instructions": "Fill the 9x9 grid so each row, column, and 3x3 box contains digits 1-9 exactly once.",
     "controls": "Click a cell, then click a number or use number keys to fill",
     "howToPlay": "Select an empty cell by clicking it. Then click a number (1-9) to place it, or use keyboard number keys. Each row, column, and 3x3 box must contain all digits 1-9 without repeats."
+  },
+  {
+    "id": "bananabread",
+    "name": "BananaBread",
+    "description": "A full 3D first-person shooter ported from Cube 2: Sauerbraten to the browser via Emscripten. Fight bots across multiple futuristic arenas!",
+    "genre": "FPS",
+    "play_url": "https://kripken.github.io/BananaBread/cube2/bb.html",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/bananabread.svg",
+    "instructions": "Fight AI bots across multiple 3D arenas. Choose from 7 weapons. Survive and eliminate all enemies to win the round.",
+    "controls": "WASD to move, Mouse to aim/look, Left Click to shoot, Space to jump, 1-5 to switch weapons, 0 for menu",
+    "howToPlay": "Move with WASD keys and aim with your mouse. Left-click to fire your weapon. Use number keys 1-5 to switch between 7 weapons (pistol, shotgun, machine gun, rocket launcher, rifle, grenade launcher, fist). Press 0 or backtick to open the menu where you can add bots or adjust settings. Press 9 for third-person mode. Press E for edit mode."
+  },
+  {
+    "id": "fps2",
+    "name": "FPS2",
+    "description": "A lightweight multiplayer first-person shooter built with pure JavaScript. Features multiple maps, weapons, and a forge mode!",
+    "genre": "FPS",
+    "play_url": "https://fps2.parkingmaster.tk",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/fps2.svg",
+    "instructions": "Battle opponents across various maps in this browser-based FPS. Collect weapons, customize loadouts, and dominate the arena.",
+    "controls": "WASD to move, Mouse to aim, Left Click to shoot, number keys for weapons. Use menus to navigate game modes.",
+    "howToPlay": "Navigate to PLAY from the main menu. Choose Quick Play to jump into a match, or Forge mode to build custom maps. WASD moves your character and the mouse controls your aim. Click to shoot. Collect weapons and power-ups scattered around maps. Check the STORE for cosmetic upgrades using points earned in matches."
+  },
+  {
+    "id": "dwasm",
+    "name": "Dwasm - DOOM in Browser",
+    "description": "The legendary DOOM engine running in your browser via WebAssembly. Play shareware DOOM, Freedoom, or custom WAD files!",
+    "genre": "FPS",
+    "play_url": "https://dwasm.m-h.org.uk/",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/dwasm.svg",
+    "instructions": "Select a game from the dropdown (Shareware DOOM, Freedoom, HACX, Harmony, REKKR, or upload a custom WAD) and click Start.",
+    "controls": "Arrow keys or WASD to move, Ctrl or Left Click to shoot, Space to open/use, Shift to run, 1-7 to switch weapons, F1 for controls help",
+    "howToPlay": "Choose your game from the selection list — Shareware DOOM includes the first episode, Freedoom is a free alternative. Click 'Start Dwasm' to begin. Move with arrow/WASD keys, shoot with Ctrl or left click, run with Shift. Navigate levels to find the exit (usually a green or red door). Collect keys, health, armor, and ammo to survive. Press F1 anytime to see full controls."
+  },
+  {
+    "id": "qwasm",
+    "name": "Qwasm - Quake in Browser",
+    "description": "The classic Quake engine running in your browser via WebAssembly. Play the shareware episode, mission packs, or LibreQuake!",
+    "genre": "FPS",
+    "play_url": "https://qwasm.m-h.org.uk/",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/qwasm.svg",
+    "instructions": "Select Quake or LibreQuake, choose resolution and hardware acceleration, then click Start. The shareware episode downloads automatically.",
+    "controls": "WASD to move, Mouse to aim/look, Left Click to shoot, Space to jump, Shift to run, 1-6 to switch weapons, Tab for scores, Esc for menu",
+    "howToPlay": "Select 'Standard Quake' for the original shareware episode (downloads automatically) or 'LibreQuake' for a free alternative with bots. Click 'Start Qwasm' to begin. Move with WASD, aim with the mouse, and left-click to shoot. Collect weapons (shotgun, super shotgun, nailgun, super nailgun, grenade launcher, rocket launcher, lightning gun) and ammo. Find the exit teleporter to finish each level. Press F1 for keyboard controls."
+  },
+  {
+    "id": "3js-fps",
+    "name": "3JS FPS",
+    "description": "A Three.js-based first-person shooter demo with mouse look, keyboard controls, and gamepad support. Explore a 3D environment!",
+    "genre": "FPS",
+    "play_url": "https://stemkoski.github.io/7DFPS/index.html",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/3js-fps.svg",
+    "instructions": "Explore a 3D first-person environment built with Three.js. Navigate the arena and test your FPS skills.",
+    "controls": "WASD to move, Mouse (click to lock) to look around, Q/E to turn, R/F to look up/down, Space to jump",
+    "howToPlay": "Click anywhere in the game window to activate mouse look (requires pointer lock). WASD moves you forward/backward/left/right. Move your mouse to look around. Q and E turn you left/right. R and F look up/down. Press Space to jump. Press Escape to exit mouse look mode. See if you can reach the secret room with the star!"
   }
 ]
