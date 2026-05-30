@@ -91,6 +91,4 @@ ipcMain.handle('read-library', () => {
 
 // Reduced IPC for HTML5 Portal Version
 // No native cloning or building required anymore.
-ipcMain.handle('select-directory', async () => {
-  return null; // Deprecated
-});
+// Note: select-directory is handled above (line 73)

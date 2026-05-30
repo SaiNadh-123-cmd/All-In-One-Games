@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200">
+  <rect width="400" height="200" fill="#0f172a"/>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0c4a6e"/>
+      <stop offset="40%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="200" fill="url(#sky)"/>
+  <!-- Clouds -->
+  <ellipse cx="80" cy="40" rx="30" ry="10" fill="#334155" opacity="0.5"/>
+  <ellipse cx="300" cy="30" rx="25" ry="8" fill="#334155" opacity="0.4"/>
+  <ellipse cx="180" cy="55" rx="20" ry="7" fill="#334155" opacity="0.3"/>
+  <!-- Pipes -->
+  <rect x="90" y="70" width="28" height="50" rx="3" fill="#15803d"/>
+  <rect x="88" y="65" width="32" height="8" rx="2" fill="#22c55e"/>
+  <rect x="90" y="120" width="28" height="80" rx="3" fill="#15803d"/>
+  <rect x="88" y="195" width="32" height="8" rx="2" fill="#22c55e"/>
+  <rect x="250" y="40" width="28" height="40" rx="3" fill="#15803d"/>
+  <rect x="248" y="35" width="32" height="8" rx="2" fill="#22c55e"/>
+  <rect x="250" y="80" width="28" height="120" rx="3" fill="#15803d"/>
+  <rect x="248" y="195" width="32" height="8" rx="2" fill="#22c55e"/>
+  <!-- Bird -->
+  <g transform="translate(170, 95)">
+    <ellipse cx="0" cy="0" rx="14" ry="10" fill="#eab308"/>
+    <circle cx="-10" cy="-3" r="5" fill="#eab308"/>
+    <circle cx="-13" cy="-4" r="1.5" fill="#000"/>
+    <polygon points="-15,-6 -22,-3 -15,0" fill="#f97316"/>
+    <path d="M8,-2 Q15,-10 12,0 Q15,10 8,2" fill="#a16207" opacity="0.6"/>
+  </g>
+  <!-- Ground -->
+  <rect x="0" y="150" width="400" height="50" fill="#166534" opacity="0.6"/>
+  <rect x="0" y="150" width="400" height="4" fill="#15803d" opacity="0.8"/>
+  <!-- Score text -->
+  <text x="200" y="180" text-anchor="middle" fill="#64748b" font-family="sans-serif" font-size="11" opacity="0.7">FLAPPY BIRD</text>
+</svg>

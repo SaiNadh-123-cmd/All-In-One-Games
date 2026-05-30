@@ -2,82 +2,65 @@
   {
     "id": "clumsy-bird",
     "name": "Clumsy Bird",
-    "description": "A Flappy Bird clone made with MelonJS.",
+    "description": "A Flappy Bird clone made with MelonJS. Tap to fly through obstacles!",
     "genre": "Arcade",
     "play_url": "https://ellisonleao.github.io/clumsy-bird/",
-    "github_url": "https://github.com/ellisonleao/clumsy-bird",
     "embed_type": "iframe",
     "thumbnail": "/thumbnails/clumsy-bird.png"
   },
   {
     "id": "hextris",
     "name": "Hextris",
-    "description": "An addictive fast-paced puzzle game inspired by Tetris.",
+    "description": "An addictive fast-paced puzzle game inspired by Tetris with a hexagonal twist.",
     "genre": "Puzzle",
     "play_url": "https://hextris.io/",
-    "github_url": "https://github.com/hextris/hextris",
     "embed_type": "iframe",
-    "thumbnail": "/placeholder.png"
+    "thumbnail": "/thumbnails/hextris.png"
   },
   {
     "id": "pacman-canvas",
     "name": "Pac-Man HTML5",
-    "description": "A faithful recreation of Pac-Man using HTML5 Canvas.",
+    "description": "A faithful recreation of the classic Pac-Man arcade game using HTML5 Canvas.",
     "genre": "Arcade",
     "play_url": "https://pacman.platzh1rsch.ch/",
-    "github_url": "https://github.com/platzhersh/pacman-canvas",
     "embed_type": "iframe",
-    "thumbnail": "/placeholder.png"
+    "thumbnail": "/thumbnails/pacman-canvas.png"
   },
   {
     "id": "hexgl",
     "name": "HexGL",
-    "description": "A futuristic HTML5 racing game built with Three.js.",
+    "description": "A futuristic HTML5 racing game built with Three.js. Race at high speed!",
     "genre": "Racing",
     "play_url": "https://hexgl.bkcore.com/play/",
-    "github_url": "https://github.com/BKcore/HexGL",
     "embed_type": "iframe",
-    "thumbnail": "/placeholder.png"
+    "thumbnail": "/thumbnails/hexgl.png"
   },
   {
-    "id": "doom-wasm",
-    "name": "Doom WebAssembly",
-    "description": "The classic Doom engine running entirely in the browser via WebAssembly.",
-    "genre": "Shooting",
-    "play_url": "https://silentspacemarine.com/",
-    "github_url": "https://github.com/diekmann/wasm-fizzbuzz",
+    "id": "2048",
+    "name": "2048",
+    "description": "The wildly popular number puzzle game. Merge tiles to reach 2048!",
+    "genre": "Puzzle",
+    "play_url": "https://gabrielecirulli.github.io/2048/",
     "embed_type": "iframe",
-    "thumbnail": "/placeholder.png"
-  },
-  {
-    "id": "js-doom",
-    "name": "JS-Doom",
-    "description": "A port of DOOM to JavaScript using Emscripten.",
-    "genre": "Shooting",
-    "play_url": "https://js-dos.com/games/doom.exe.html",
-    "github_url": "https://github.com/caiiiycuk/js-dos",
-    "embed_type": "iframe",
-    "thumbnail": "/placeholder.png"
+    "thumbnail": "/thumbnails/2048.svg"
   },
   {
     "id": "space-invaders",
     "name": "Space Invaders",
-    "description": "A classic Space Invaders clone in HTML5.",
+    "description": "A classic Space Invaders clone in HTML5. Defend Earth from aliens!",
     "genre": "Shooting",
     "play_url": "https://cykod.github.io/AlienInvasion/",
-    "github_url": "https://github.com/cykod/AlienInvasion",
     "embed_type": "iframe",
-    "thumbnail": "/placeholder.png"
+    "thumbnail": "/thumbnails/space-invaders.svg"
   },
   {
-    "id": "quakejs",
-    "name": "QuakeJS",
-    "description": "A port of ioquake3 to JavaScript.",
-    "genre": "Shooting",
-    "play_url": "http://www.quakejs.com/",
-    "github_url": "https://github.com/inolen/quakejs",
+    "id": "snake",
+    "name": "Snake",
+    "description": "The classic Snake game. Eat food, grow longer, avoid walls!",
+    "genre": "Arcade",
+    "play_url": "https://www.mathsisfun.com/games/snake.html",
     "embed_type": "iframe",
-    "thumbnail": "/placeholder.png"
+    "thumbnail": "/thumbnails/snake.svg"
   },
   {
     "id": "duckhunt",
@@ -85,57 +68,60 @@
     "description": "A JavaScript implementation of the classic NES Duck Hunt game.",
     "genre": "Shooting",
     "play_url": "https://duckhuntjs.com/",
-    "github_url": "https://github.com/MattSurabian/DuckHunt-JS",
     "embed_type": "iframe",
-    "thumbnail": "/placeholder.png"
+    "thumbnail": "/thumbnails/duckhunt.svg"
   },
   {
     "id": "flappy-bird",
-    "name": "Flappy Bird HTML5",
-    "description": "A perfect recreation of Flappy Bird in Phaser.js.",
+    "name": "Flappy Bird",
+    "description": "A perfect recreation of Flappy Bird in Phaser.js. How far can you go?",
     "genre": "Arcade",
     "play_url": "https://hyspace.io/Flappy-Bird/",
-    "github_url": "https://github.com/hyspace/Flappy-Bird",
     "embed_type": "iframe",
-    "thumbnail": "/placeholder.png"
+    "thumbnail": "/thumbnails/flappy-bird.svg"
   },
   {
     "id": "custom-tetris",
     "name": "Custom Tetris",
-    "description": "A customizable, open-source Tetris implementation.",
+    "description": "A customizable open-source Tetris implementation with many options.",
     "genre": "Puzzle",
     "play_url": "https://ondras.github.io/custom-tetris/",
-    "github_url": "https://github.com/ondras/custom-tetris",
     "embed_type": "iframe",
-    "thumbnail": "/placeholder.png"
+    "thumbnail": "/thumbnails/custom-tetris.svg"
   },
   {
     "id": "minesweeper",
     "name": "Minesweeper",
-    "description": "A faithful replica of Windows XP Minesweeper.",
+    "description": "A faithful replica of the classic Minesweeper game. Clear the minefield!",
     "genre": "Puzzle",
     "play_url": "https://minesweeperonline.com/",
-    "github_url": "https://github.com/mrgnr/minesweeper",
     "embed_type": "iframe",
-    "thumbnail": "/placeholder.png"
+    "thumbnail": "/thumbnails/minesweeper.png"
+  },
+  {
+    "id": "breakout",
+    "name": "Breakout",
+    "description": "The classic brick-breaking arcade game. Smash all the bricks!",
+    "genre": "Arcade",
+    "play_url": "https://www.mathsisfun.com/games/breakout.html",
+    "embed_type": "iframe",
+    "thumbnail": "/thumbnails/breakout.svg"
   },
   {
     "id": "simcity",
     "name": "Micropolis (SimCity)",
-    "description": "An HTML5 port of the original SimCity classic (Micropolis).",
+    "description": "An HTML5 port of the original SimCity classic. Build your dream city!",
     "genre": "Simulation",
     "play_url": "http://micropolis.mostka.com/",
-    "github_url": "https://github.com/simcity/micropolis",
     "embed_type": "iframe",
-    "thumbnail": "/placeholder.png"
+    "thumbnail": "/thumbnails/simcity.png"
   },
   {
     "id": "sudoku",
     "name": "Sudoku",
-    "description": "A clean, responsive HTML5 Sudoku game.",
+    "description": "A clean responsive HTML5 Sudoku game with multiple difficulty levels.",
     "genre": "Puzzle",
     "play_url": "https://sudoku.com/",
-    "github_url": "https://github.com/Pocket-Inc/sudoku-html5",
     "embed_type": "iframe",
     "thumbnail": "/thumbnails/sudoku.svg"
   }

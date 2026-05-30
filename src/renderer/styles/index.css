@@ -4,22 +4,25 @@
 
 @layer base {
   :root {
-    --background: #f8fafc;
-    --foreground: #0f172a;
-    --card: #ffffff;
-    --primary: #3b82f6;
-    --accent: #f43f5e;
-  }
-  
-  .dark {
-    --background: #0f172a;
-    --foreground: #f8fafc;
+    --background: #0a0f1a;
+    --foreground: #f1f5f9;
     --card: #1e293b;
     --primary: #3b82f6;
-    --accent: #f43f5e;
+    --accent: #8b5cf6;
   }
 
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  input::placeholder {
+    color: #475569;
+  }
+
+  ::selection {
+    background: rgba(59, 130, 246, 0.3);
+    color: #fff;
   }
 }

@@ -37,20 +37,28 @@ const download = (url, dest) => {
 
 async function main() {
   for (const game of db) {
-    if (game.thumbnail && game.thumbnail.startsWith('http')) {
-      const ext = path.extname(new URL(game.thumbnail).pathname) || '.png';
+    if (!game.thumbnail || game.thumbnail.startsWith('/placeholder.png') || game.thumbnail.startsWith('http')) {
+      const ext = '.png';
       const destFile = `${game.id}${ext}`;
       const destPath = path.join(thumbsDir, destFile);
       
       console.log(`Downloading ${game.thumbnail}...`);
       try {
+        if (!game.thumbnail.startsWith('http')) throw new Error('Not HTTP');
         await download(game.thumbnail, destPath);
         game.thumbnail = `/thumbnails/${destFile}`;
         console.log(`Success: ${game.id}`);
       } catch (e) {
-        console.error(`Failed for ${game.id}:`, e.message);
-        // use a nice generic fallback image locally if it fails
-        game.thumbnail = '/placeholder.png';
+        console.log(`Failed for ${game.id}, falling back to Favicon...`);
+        try {
+          const domain = new URL(game.play_url).hostname;
+          const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=256`;
+          await download(faviconUrl, destPath);
+          game.thumbnail = `/thumbnails/${destFile}`;
+          console.log(`Favicon Success: ${game.id}`);
+        } catch (err2) {
+           console.log(`Favicon Failed for ${game.id}`);
+        }
       }
     }
   }

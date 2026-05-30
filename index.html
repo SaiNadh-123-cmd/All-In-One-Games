@@ -2,28 +2,24 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="google-adsense-account" content="ca-pub-5224273312267357" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-  html, body {
-    height: 100%;
-    margin: 0;
-    overflow: auto;
-    background: #111;
-  }
-  ::-webkit-scrollbar { width: 12px; height: 12px; }
-  ::-webkit-scrollbar-track { background: #111; }
-  ::-webkit-scrollbar-thumb { background: #444; border-radius: 6px; }
-  ::-webkit-scrollbar-thumb:hover { background: #666; }
-</style>
-
+    <meta name="google-adsense-account" content="ca-pub-5224273312267357" />
+    <meta name="description" content="GameVault - Play free browser games instantly. No downloads, no sign-ups." />
+    <meta name="theme-color" content="#0a0f1a" />
+    <title>GameVault - Free Browser Games</title>
     <link rel="icon" type="image/png" href="/logo.png" />
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5224273312267357"
-     crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5224273312267357" crossorigin="anonymous"></script>
+    <style>
+      html, body { height: 100%; margin: 0; padding: 0; background: #0a0f1a; }
+      #root { min-height: 100vh; display: flex; flex-direction: column; }
+      * { box-sizing: border-box; }
+    </style>
   </head>
-  <body class="bg-background text-foreground">
-    <div id="root" class="h-screen w-screen flex flex-col"></div>
+  <body>
+    <div id="root"></div>
     <script type="module" src="/src/renderer/index.tsx"></script>
   </body>
 </html>
