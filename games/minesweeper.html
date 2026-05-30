@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Minesweeper</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0f1a;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:sans-serif;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
+#wrap{text-align:center}
+#hud{display:flex;justify-content:space-between;padding:8px 4px;color:#94a3b8;font-size:14px;max-width:300px;margin:0 auto}
+#hud span{font-weight:700}.mines{color:#ef4444}.time{color:#3b82f6}
+#board{display:inline-grid;gap:1px;background:#334155;padding:3px;border-radius:6px;margin:0 auto}
+.cell{width:36px;height:36px;border:none;font-size:14px;font-weight:700;cursor:pointer;border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:sans-serif}
+.cell-0{background:#1e293b;cursor:default}
+.cell-1{background:#1e293b;color:#3b82f6;cursor:default}
+.cell-2{background:#1e293b;color:#22c55e;cursor:default}
+.cell-3{background:#1e293b;color:#ef4444;cursor:default}
+.cell-4{background:#1e293b;color:#8b5cf6;cursor:default}
+.cell-5{background:#1e293b;color:#f97316;cursor:default}
+.cell-6{background:#1e293b;color:#06b6d4;cursor:default}
+.cell-7{background:#1e293b;color:#eab308;cursor:default}
+.cell-8{background:#1e293b;color:#94a3b8;cursor:default}
+.cell-hidden{background:#334155;cursor:pointer}
+.cell-hidden:active{background:#475569}
+.cell-flagged{background:#334155;color:#ef4444;cursor:pointer}
+.cell-mine{background:#991b1b;color:#fca5a5;cursor:default}
+.cell-mine-btn{background:#334155;color:#ef4444}
+#overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,.7);justify-content:center;align-items:center;flex-direction:column;gap:16px}
+#overlay.show{display:flex}
+#overlay h2{color:#f1f5f9;font-size:24px}
+#overlay p{color:#94a3b8;font-size:14px}
+#overlay button{padding:12px 32px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="wrap">
+<div id="hud"><span class="mines">💣 <span id="mines-left">10</span></span><span class="time">⏱ <span id="timer">0</span></span><span>Best: <span id="best">-</span></span></div>
+<div style="position:relative;display:inline-block">
+<div id="board"></div>
+<div id="overlay"><h2 id="ol-title">Minesweeper</h2><p id="ol-msg">Find all mines without detonating!</p><button id="ol-btn">Play</button></div>
+</div>
+</div>
+<script>
+const boardEl=document.getElementById('board'),minesLeftEl=document.getElementById('mines-left'),timerEl=document.getElementById('timer'),bestEl=document.getElementById('best');
+const overlay=document.getElementById('overlay'),olTitle=document.getElementById('ol-title'),olMsg=document.getElementById('ol-msg'),olBtn=document.getElementById('ol-btn');
+let best=localStorage.getItem('minesweeper_best');bestEl.textContent=best||'-';
+let ROWS=9,COLS=9,TOTAL_MINES=10;
+let grid=[],minePositions=[],revealed=[],flagged=[],gameOver=false,firstClick=true,timer=0,timerInt,gameWon=false;
+function init(){
+  grid=Array.from({length:ROWS},()=>Array(COLS).fill(0));
+  minePositions=[];revealed=Array.from({length:ROWS},()=>Array(COLS).fill(false));
+  flagged=Array.from({length:ROWS},()=>Array(COLS).fill(false));
+  gameOver=false;gameWon=false;firstClick=true;timer=0;timerEl.textContent='0';
+  minesLeftEl.textContent=TOTAL_MINES;
+  clearInterval(timerInt);render();
+}
+function placeMines(safeR,safeC){
+  let placed=0;
+  while(placed<TOTAL_MINES){
+    const r=Math.floor(Math.random()*ROWS),c=Math.floor(Math.random()*COLS);
+    if(minePositions.some(m=>m.r===r&&m.c===c)||(Math.abs(r-safeR)<=1&&Math.abs(c-safeC)<=1))continue;
+    minePositions.push({r,c});grid[r][c]=-1;placed++;
+  }
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(grid[r][c]!==-1){
+    let n=0;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){const nr=r+dr,nc=c+dc;if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&grid[nr][nc]===-1)n++;}
+    grid[r][c]=n;
+  }
+}
+function reveal(r,c){
+  if(r<0||r>=ROWS||c<0||c>=COLS||revealed[r][c]||flagged[r][c])return;
+  revealed[r][c]=true;
+  if(grid[r][c]===-1){triggerMine(r,c);return;}
+  if(grid[r][c]===0)for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++)reveal(r+dr,c+dc);
+  render();checkWin();
+}
+function triggerMine(r,c){
+  gameOver=true;clearInterval(timerInt);
+  minePositions.forEach(m=>{if(!flagged[m.r][m.c])revealed[m.r][m.c]=true;});
+  revealed[r][c]=true;render();
+  setTimeout(()=>{
+    overlay.classList.add('show');olTitle.textContent='💥 Game Over';olMsg.textContent='You hit a mine!';olBtn.textContent='Retry';
+  },300);
+}
+function checkWin(){
+  if(gameOver)return;
+  const won=grid.every((row,r)=>row.every((_,c)=>grid[r][c]===-1||revealed[r][c]));
+  if(won){
+    gameOver=true;gameWon=true;clearInterval(timerInt);
+    const t=timer;if(!best||t<parseInt(best)){best=t.toString();localStorage.setItem('minesweeper_best',best);bestEl.textContent=best;}
+    render();
+    overlay.classList.add('show');olTitle.textContent='🎉 You Win!';olMsg.textContent=`Time: ${t}s`;olBtn.textContent='Play Again';
+  }
+}
+function toggleFlag(r,c){
+  if(revealed[r][c]||gameOver)return;
+  flagged[r][c]=!flagged[r][c];
+  const cnt=minePositions.filter(m=>flagged[m.r][m.c]).length;
+  minesLeftEl.textContent=TOTAL_MINES-cnt;render();
+}
+function render(){
+  boardEl.style.gridTemplateColumns=`repeat(${COLS},36px)`;
+  boardEl.innerHTML='';
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const cell=document.createElement('div');cell.className='cell';
+    if(revealed[r][c]){
+      if(grid[r][c]===-1)cell.classList.add('cell-mine');
+      else cell.classList.add(`cell-${grid[r][c]}`);
+      if(grid[r][c]===-1)cell.textContent='💣';else if(grid[r][c]>0)cell.textContent=grid[r][c];
+    }else if(flagged[r][c]){cell.classList.add('cell-flagged');cell.textContent='🚩';}
+    else cell.classList.add('cell-hidden');
+    cell.dataset.r=r;cell.dataset.c=c;
+    cell.addEventListener('click',()=>{if(gameOver||flagged[r][c])return;if(firstClick){placeMines(r,c);firstClick=false;timerInt=setInterval(()=>{timer++;timerEl.textContent=timer;},1000);}reveal(r,c);});
+    cell.addEventListener('contextmenu',e=>{e.preventDefault();toggleFlag(r,c);});
+    let longPress;cell.addEventListener('touchstart',e=>{longPress=setTimeout(()=>{e.preventDefault();toggleFlag(r,c);},400);},{passive:true});
+    cell.addEventListener('touchend',()=>clearTimeout(longPress));
+    cell.addEventListener('touchmove',()=>clearTimeout(longPress));
+    boardEl.appendChild(cell);
+  }
+}
+function startGame(){overlay.classList.remove('show');init();}
+olBtn.addEventListener('click',startGame);
+init();overlay.classList.add('show');olTitle.textContent='Minesweeper';olMsg.textContent='Tap to reveal. Hold to flag. Avoid mines!';olBtn.textContent='Play';
+</script>
+</body>
+</html>

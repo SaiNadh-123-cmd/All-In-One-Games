@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Breakout</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0f1a;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:sans-serif;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
+#wrap{text-align:center}
+canvas{display:block;margin:0 auto;border:2px solid #334155;border-radius:8px;background:#0f172a;max-width:95vw;max-height:70vh}
+#hud{display:flex;justify-content:space-between;padding:8px 4px;color:#94a3b8;font-size:14px;max-width:600px;margin:0 auto}
+#hud span{font-weight:700}.score{color:#eab308}.lives{color:#ef4444}
+#overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,.7);justify-content:center;align-items:center;flex-direction:column;gap:16px}
+#overlay.show{display:flex}
+#overlay h2{color:#f1f5f9;font-size:24px}
+#overlay p{color:#94a3b8;font-size:14px}
+#overlay button{padding:12px 32px;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="wrap">
+<div id="hud"><span class="score">Score: <span id="score">0</span></span><span class="lives">Lives: <span id="lives">3</span></span><span>Best: <span id="best">0</span></span></div>
+<div style="position:relative">
+<canvas id="gc" width="600" height="400"></canvas>
+<div id="overlay"><h2 id="ol-title">Breakout</h2><p id="ol-msg">Break all the bricks!</p><button id="ol-btn">Play</button></div>
+</div>
+</div>
+<script>
+const c=document.getElementById('gc'),ctx=c.getContext('2d');
+const scoreEl=document.getElementById('score'),livesEl=document.getElementById('lives'),bestEl=document.getElementById('best');
+const overlay=document.getElementById('overlay'),olTitle=document.getElementById('ol-title'),olMsg=document.getElementById('ol-msg'),olBtn=document.getElementById('ol-btn');
+let best=parseInt(localStorage.getItem('breakout_best')||'0');bestEl.textContent=best;
+let ball,paddle,bricks,score,lives,loop,running,animId;
+const PW=100,PH=12,BH=20,COLS=10,ROWS=6,BW=54;
+const colors=['#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6'];
+function init(){
+  ball={x:300,y:350,r:6,dx:3,dy:-3,speed:3};
+  paddle={x:250,y:380,w:PW,h:PH};
+  bricks=[];score=0;lives=3;running=false;
+  scoreEl.textContent='0';livesEl.textContent='3';
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)
+    bricks.push({x:c*BW+3+((600-COLS*BW)/2),y:r*(BH+4)+30,w:BW-2,h:BH,alive:true,color:colors[r]});
+}
+function draw(){
+  ctx.fillStyle='#0f172a';ctx.fillRect(0,0,600,400);
+  bricks.forEach(b=>{if(b.alive){ctx.fillStyle=b.color;ctx.shadowColor=b.color;ctx.shadowBlur=6;ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,3);ctx.fill();}});
+  ctx.shadowBlur=0;
+  ctx.fillStyle='#60a5fa';ctx.shadowColor='#60a5fa';ctx.shadowBlur=15;
+  ctx.beginPath();ctx.roundRect(paddle.x,paddle.y,paddle.w,paddle.h,6);ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.fillStyle='#f1f5f9';ctx.shadowColor='#f1f5f9';ctx.shadowBlur=10;
+  ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+}
+function update(){
+  if(!running)return;
+  ball.x+=ball.dx;ball.y+=ball.dy;
+  if(ball.x-ball.r<0||ball.x+ball.r>600)ball.dx=-ball.dx;
+  if(ball.y-ball.r<0)ball.dy=-ball.dy;
+  if(ball.y+ball.r>400){lives--;livesEl.textContent=lives;if(lives<=0){gameOver();return;}resetBall();return;}
+  if(ball.y+ball.r>paddle.y&&ball.y-ball.r<paddle.y+paddle.h&&ball.x>paddle.x&&ball.x<paddle.x+paddle.w){ball.dy=-Math.abs(ball.dy);ball.y=paddle.y-ball.r;const hit=ball.x-paddle.x;ball.dx=3*((hit/paddle.w)*2-1);}
+  let hit=false;
+  bricks.forEach(b=>{if(!b.alive)return;if(ball.x+ball.r>b.x&&ball.x-ball.r<b.x+b.w&&ball.y+ball.r>b.y&&ball.y-ball.r<b.y+b.h){b.alive=false;score+=10;scoreEl.textContent=score;hit=true;const overlap=[ball.x+ball.r-b.x,b.x+b.w-ball.x+ball.r,ball.y+ball.r-b.y,b.y+b.h-ball.y+ball.r];const min=Math.min(...overlap),idx=overlap.indexOf(min);if(idx<2)ball.dx=-ball.dx;else ball.dy=-ball.dy;}});
+  if(bricks.every(b=>!b.alive)){running=false;clearInterval(loop);win();}
+}
+function resetBall(){ball.x=300;ball.y=350;ball.dx=3*Math.random()>0.5?1:-1;ball.dy=-3;running=false;setTimeout(()=>{running=true;},500);}
+function gameOver(){
+  clearInterval(loop);running=false;
+  if(score>best){best=score;bestEl.textContent=best;localStorage.setItem('breakout_best',best.toString());}
+  overlay.classList.add('show');olTitle.textContent='Game Over';olMsg.textContent=`Score: ${score}`;olBtn.textContent='Restart';
+  if(typeof animId!=='undefined')cancelAnimationFrame(animId);
+}
+function win(){
+  clearInterval(loop);
+  if(score>best){best=score;bestEl.textContent=best;localStorage.setItem('breakout_best',best.toString());}
+  overlay.classList.add('show');olTitle.textContent='You Win!';olMsg.textContent=`Score: ${score}`;olBtn.textContent='Play Again';
+}
+function renderLoop(){draw();animId=requestAnimationFrame(renderLoop);}
+function startGame(){
+  overlay.classList.remove('show');init();running=true;
+  clearInterval(loop);loop=setInterval(update,1000/60);
+}
+olBtn.addEventListener('click',startGame);
+let mouseX=250;
+c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();mouseX=Math.max(0,Math.min(600,e.clientX-r.left-PW/2));if(running)paddle.x=mouseX;});
+c.addEventListener('touchmove',e=>{e.preventDefault();const r=c.getBoundingClientRect(),t=e.touches[0];paddle.x=Math.max(0,Math.min(600,t.clientX-r.left-PW/2));},{passive:false});
+document.addEventListener('keydown',e=>{if(!running)return;const k=e.key;k==='ArrowLeft'&&(paddle.x=Math.max(0,paddle.x-20));k==='ArrowRight'&&(paddle.x=Math.min(600-PW,paddle.x+20));e.preventDefault();});
+if(!CanvasRenderingContext2D.prototype.roundRect)CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){if(r>w/2)r=w/2;if(r>h/2)r=h/2;this.moveTo(x+r,y);this.arcTo(x+w,y,x+w,y+h,r);this.arcTo(x+w,y+h,x,y+h,r);this.arcTo(x,y+h,x,y,r);this.arcTo(x,y,x+w,y,r);this.closePath()};
+init();renderLoop();overlay.classList.add('show');olTitle.textContent='Breakout';olMsg.textContent='Move paddle to bounce ball. Break all bricks!';olBtn.textContent='Play';
+</script>
+</body>
+</html>
