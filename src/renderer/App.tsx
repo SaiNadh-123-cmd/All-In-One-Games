@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 
 /* ── Types ───────────────────────────────────────────────────── */
 interface Game {
@@ -10,6 +10,162 @@ interface Game {
   embed_type: string;
   thumbnail: string;
 }
+
+/* ── Background Animation ────────────────────────────────────── */
+const BackgroundAnimation = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const shipRef = useRef<HTMLDivElement>(null);
+  const mouseRef = useRef({ x: -200, y: -200 });
+  const shipPosRef = useRef({ x: -200, y: -200 });
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+    canvas.width = w;
+    canvas.height = h;
+
+    interface Star {
+      x: number; y: number; r: number; a: number; da: number; speed: number;
+    }
+    const stars: Star[] = [];
+    for (let i = 0; i < 250; i++) {
+      stars.push({
+        x: Math.random() * w, y: Math.random() * h,
+        r: Math.random() * 1.8 + 0.3,
+        a: Math.random(), da: (Math.random() - 0.5) * 0.02,
+        speed: Math.random() * 0.15 + 0.02,
+      });
+    }
+
+    interface ShootingStar {
+      x: number; y: number; vx: number; vy: number; life: number; maxLife: number;
+    }
+    let shootingStars: ShootingStar[] = [];
+    let nextShootTimer = 0;
+
+    const resize = () => {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = w;
+      canvas.height = h;
+    };
+    window.addEventListener('resize', resize);
+
+    const onMouse = (e: MouseEvent) => {
+      mouseRef.current = { x: e.clientX, y: e.clientY };
+    };
+    window.addEventListener('mousemove', onMouse);
+
+    let animId: number;
+    const draw = (time: number) => {
+      ctx.clearRect(0, 0, w, h);
+
+      // ---- stars ----
+      for (const s of stars) {
+        s.a += s.da;
+        s.y += s.speed;
+        if (s.y > h + 5) { s.y = -5; s.x = Math.random() * w; }
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200,220,255,${0.2 + Math.abs(Math.sin(s.a)) * 0.6})`;
+        ctx.fill();
+      }
+
+      // ---- shooting stars ----
+      nextShootTimer--;
+      if (nextShootTimer <= 0 && shootingStars.length < 3) {
+        const sx = Math.random() * w * 0.8 + w * 0.1;
+        const sy = Math.random() * h * 0.3;
+        const angle = Math.PI * 0.15 + Math.random() * Math.PI * 0.15;
+        const spd = 4 + Math.random() * 6;
+        shootingStars.push({
+          x: sx, y: sy, vx: Math.cos(angle) * spd, vy: Math.sin(angle) * spd,
+          life: 1, maxLife: 40 + Math.random() * 40,
+        });
+        nextShootTimer = 80 + Math.random() * 200;
+      }
+      shootingStars = shootingStars.filter(s => {
+        s.x += s.vx; s.y += s.vy;
+        s.life -= 1 / s.maxLife;
+        if (s.life <= 0 || s.x > w + 20 || s.y > h + 20) return false;
+        const tail = 20;
+        const grad = ctx.createLinearGradient(s.x, s.y, s.x - s.vx * tail, s.y - s.vy * tail);
+        grad.addColorStop(0, `rgba(200,220,255,${s.life})`);
+        grad.addColorStop(1, `rgba(200,220,255,0)`);
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y);
+        ctx.lineTo(s.x - s.vx * tail, s.y - s.vy * tail);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        return true;
+      });
+
+      animId = requestAnimationFrame(draw);
+    };
+    animId = requestAnimationFrame(draw);
+
+    // ---- spaceship follow cursor ----
+    const ship = shipRef.current;
+    let shipAnimId: number;
+    const moveShip = () => {
+      if (!ship) return;
+      const m = mouseRef.current;
+      const p = shipPosRef.current;
+      p.x += (m.x - p.x) * 0.08;
+      p.y += (m.y - p.y) * 0.08;
+      const dx = m.x - p.x;
+      const dy = m.y - p.y;
+      const angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
+      ship.style.transform = `translate(${p.x}px, ${p.y}px) rotate(${angle}deg)`;
+      shipAnimId = requestAnimationFrame(moveShip);
+    };
+    shipAnimId = requestAnimationFrame(moveShip);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      cancelAnimationFrame(shipAnimId);
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('mousemove', onMouse);
+    };
+  }, []);
+
+  return (
+    <>
+      <canvas ref={canvasRef} style={{
+        position: 'fixed', inset: 0, zIndex: 0,
+        width: '100%', height: '100%',
+        pointerEvents: 'none',
+      }} />
+      <div ref={shipRef} style={{
+        position: 'fixed', zIndex: 1, pointerEvents: 'none',
+        top: -20, left: -20,
+        width: 40, height: 40,
+        transition: 'none',
+      }}>
+        <svg viewBox="0 0 40 40" width="40" height="40">
+          <defs>
+            <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#60a5fa" />
+              <stop offset="100%" stopColor="#3b82f6" />
+            </linearGradient>
+          </defs>
+          <polygon points="20,2 30,32 20,26 10,32" fill="url(#bodyGrad)" opacity="0.95" />
+          <polygon points="20,8 26,28 20,24 14,28" fill="#93c5fd" opacity="0.7" />
+          <polygon points="20,4 23,14 20,12 17,14" fill="#bfdbfe" opacity="0.5" />
+          <ellipse cx="20" cy="20" rx="3" ry="5" fill="#fff" opacity="0.9" />
+          <circle cx="20" cy="18" r="1.5" fill="#0f172a" />
+          <polygon points="12,30 20,26 28,30 24,34 20,30 16,34" fill="#1e40af" opacity="0.8" />
+        </svg>
+      </div>
+    </>
+  );
+};
 
 /* ── Ad Component ────────────────────────────────────────────── */
 let adCount = 0;
@@ -39,8 +195,6 @@ const genreColors: Record<string, { bg: string; text: string; glow: string }> = 
   Racing:      { bg: 'rgba(34,197,94,0.15)',   text: '#22c55e',  glow: 'rgba(34,197,94,0.3)' },
   Simulation:  { bg: 'rgba(59,130,246,0.15)',  text: '#3b82f6',  glow: 'rgba(59,130,246,0.3)' },
 };
-
-/* ── Genre Filter Pills ──────────────────────────────────────── */
 const allGenres = ['Arcade', 'Puzzle', 'Shooting', 'Racing', 'Simulation'];
 
 /* ── Post-Game Screen ────────────────────────────────────────── */
@@ -76,7 +230,6 @@ const PostGameScreen = ({ game, onClose }: { game: Game; onClose: () => void }) 
         background: 'rgba(30,41,59,0.5)', borderRadius: 16,
         border: '1px solid rgba(71,85,105,0.4)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: '#64748b', fontSize: 14,
       }}>
         <AdUnit />
       </div>
@@ -104,7 +257,8 @@ const GameCard = ({ game, onPlay }: { game: Game; onPlay: () => void }) => {
 
   return (
     <div className="game-card" style={{
-      background: 'linear-gradient(145deg, #1e293b, #0f172a)',
+      background: 'linear-gradient(145deg, rgba(30,41,59,0.8), rgba(15,23,42,0.9))',
+      backdropFilter: 'blur(8px)',
       borderRadius: 16, overflow: 'hidden',
       border: '1px solid rgba(71,85,105,0.3)',
       display: 'flex', flexDirection: 'column',
@@ -123,7 +277,6 @@ const GameCard = ({ game, onPlay }: { game: Game; onPlay: () => void }) => {
       e.currentTarget.style.borderColor = 'rgba(71,85,105,0.3)';
     }}
     >
-      {/* Thumbnail */}
       <div style={{ height: 150, background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{
           position: 'absolute', inset: 0,
@@ -147,8 +300,6 @@ const GameCard = ({ game, onPlay }: { game: Game; onPlay: () => void }) => {
           backdropFilter: 'blur(4px)',
         }}>{game.genre}</span>
       </div>
-
-      {/* Info */}
       <div style={{ padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', flex: 1, gap: 8 }}>
         <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#f1f5f9', lineHeight: 1.3 }}>{game.name}</h3>
         <p style={{ margin: 0, fontSize: 12, color: '#94a3b8', lineHeight: 1.5, flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{game.description}</p>
@@ -158,7 +309,6 @@ const GameCard = ({ game, onPlay }: { game: Game; onPlay: () => void }) => {
           color: '#fff', border: 'none', borderRadius: 10,
           fontSize: 13, fontWeight: 700, cursor: 'pointer',
           transition: 'all 0.3s',
-          position: 'relative', overflow: 'hidden',
           letterSpacing: 0.5,
         }}
         onMouseEnter={e => {
@@ -178,20 +328,25 @@ const GameCard = ({ game, onPlay }: { game: Game; onPlay: () => void }) => {
 
 /* ── Loading Skeleton ─────────────────────────────────────────── */
 const Skeleton = () => (
-  <div style={{ background: 'linear-gradient(145deg, #1e293b, #0f172a)', borderRadius: 16, overflow: 'hidden', border: '1px solid rgba(71,85,105,0.3)', animation: 'pulse 1.5s infinite' }}>
-    <div style={{ height: 150, background: '#1e293b' }} />
+  <div className="skeleton" style={{
+    background: 'linear-gradient(145deg, rgba(30,41,59,0.8), rgba(15,23,42,0.9))',
+    backdropFilter: 'blur(8px)',
+    borderRadius: 16, overflow: 'hidden',
+    border: '1px solid rgba(71,85,105,0.3)',
+  }}>
+    <div style={{ height: 150, background: 'rgba(30,41,59,0.5)' }} />
     <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ height: 14, width: '60%', background: '#1e293b', borderRadius: 4 }} />
-      <div style={{ height: 10, width: '90%', background: '#1e293b', borderRadius: 4 }} />
-      <div style={{ height: 10, width: '70%', background: '#1e293b', borderRadius: 4 }} />
-      <div style={{ height: 36, width: '100%', background: '#1e293b', borderRadius: 10, marginTop: 4 }} />
+      <div style={{ height: 14, width: '60%', background: 'rgba(30,41,59,0.5)', borderRadius: 4 }} />
+      <div style={{ height: 10, width: '90%', background: 'rgba(30,41,59,0.5)', borderRadius: 4 }} />
+      <div style={{ height: 10, width: '70%', background: 'rgba(30,41,59,0.5)', borderRadius: 4 }} />
+      <div style={{ height: 36, width: '100%', background: 'rgba(30,41,59,0.5)', borderRadius: 10, marginTop: 4 }} />
     </div>
   </div>
 );
 
 /* ── Empty State ─────────────────────────────────────────────── */
 const EmptyState = ({ query }: { query: string }) => (
-  <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px' }}>
+  <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '60px 20px', position: 'relative', zIndex: 2 }}>
     <div style={{ fontSize: 48, marginBottom: 16 }}>🎮</div>
     <h3 style={{ color: '#f1f5f9', fontSize: 20, fontWeight: 700, margin: '0 0 8px' }}>No games found</h3>
     <p style={{ color: '#64748b', fontSize: 14, margin: 0 }}>
@@ -240,12 +395,16 @@ const App = () => {
   }, [filtered.length]);
 
   return (
-    <div style={{ minHeight: '100vh', width: '100%', background: '#0a0f1a', color: '#f1f5f9', fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}>
+    <div style={{ minHeight: '100vh', width: '100%', background: '#0a0f1a', color: '#f1f5f9', fontFamily: 'Inter, system-ui, -apple-system, sans-serif', position: 'relative' }}>
+
+      <BackgroundAnimation />
 
       {/* ── Header ── */}
       <header style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
-        borderBottom: '1px solid rgba(71,85,105,0.3)',
+        position: 'relative', zIndex: 2,
+        background: 'linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,41,59,0.7) 50%, rgba(15,23,42,0.85) 100%)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(71,85,105,0.2)',
         padding: '32px 24px 24px',
       }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -255,7 +414,7 @@ const App = () => {
               background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 22, fontWeight: 800, color: '#fff',
-              boxShadow: '0 4px 12px rgba(59,130,246,0.3)',
+              boxShadow: '0 4px 20px rgba(59,130,246,0.3)',
             }}>G</div>
             <div>
               <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, background: 'linear-gradient(135deg, #f1f5f9, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -266,24 +425,20 @@ const App = () => {
               </p>
             </div>
           </div>
-
-          {/* Search */}
           <div style={{ position: 'relative', maxWidth: 500, marginBottom: 16 }}>
             <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#64748b', fontSize: 16, pointerEvents: 'none' }}>🔍</span>
             <input type="text" placeholder="Search games..." value={search} onChange={e => setSearch(e.target.value)}
               style={{
                 width: '100%', padding: '12px 16px 12px 44px',
-                background: 'rgba(30,41,59,0.7)', border: '1px solid rgba(71,85,105,0.4)',
+                background: 'rgba(30,41,59,0.6)', border: '1px solid rgba(71,85,105,0.3)',
                 borderRadius: 12, color: '#f1f5f9', fontSize: 14, outline: 'none',
-                transition: 'border-color 0.2s',
+                transition: 'border-color 0.2s, box-shadow 0.2s',
                 boxSizing: 'border-box',
               }}
-              onFocus={e => e.currentTarget.style.borderColor = '#3b82f6'}
-              onBlur={e => e.currentTarget.style.borderColor = 'rgba(71,85,105,0.4)'}
+              onFocus={e => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 0 20px rgba(59,130,246,0.15)'; }}
+              onBlur={e => { e.currentTarget.style.borderColor = 'rgba(71,85,105,0.3)'; e.currentTarget.style.boxShadow = 'none'; }}
             />
           </div>
-
-          {/* Genre Filter Chips */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             <button onClick={() => setSelectedGenre(null)} style={{
               padding: '6px 16px', borderRadius: 20, fontSize: 12, fontWeight: 600,
@@ -308,27 +463,23 @@ const App = () => {
         </div>
       </header>
 
-      {/* ── Ad Banner Below Header ── */}
-      <div style={{ padding: '8px 24px', borderBottom: '1px solid rgba(71,85,105,0.2)', background: '#0a0f1a' }}>
+      {/* ── Ad ── */}
+      <div style={{ position: 'relative', zIndex: 2, padding: '8px 24px', borderBottom: '1px solid rgba(71,85,105,0.15)', background: 'rgba(10,15,26,0.5)', backdropFilter: 'blur(8px)' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', minHeight: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ width: '100%', maxWidth: 728, minHeight: 60, background: 'rgba(30,41,59,0.3)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: 11 }}>
+          <div style={{ width: '100%', maxWidth: 728, minHeight: 60, background: 'rgba(30,41,59,0.2)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: 11 }}>
             <AdUnit />
           </div>
         </div>
       </div>
 
       {/* ── Main Content ── */}
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '28px 24px 60px' }}>
-
-        {/* Results count */}
+      <main style={{ position: 'relative', zIndex: 2, maxWidth: 1200, margin: '0 auto', padding: '28px 24px 60px' }}>
         {!loading && (
           <p style={{ margin: '0 0 20px', fontSize: 13, color: '#64748b' }}>
             {filtered.length} {filtered.length === 1 ? 'game' : 'games'} found
             {selectedGenre && <span> in <span style={{ color: (genreColors[selectedGenre] || {}).text || '#94a3b8' }}>{selectedGenre}</span></span>}
           </p>
         )}
-
-        {/* Game Grid */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
@@ -342,7 +493,7 @@ const App = () => {
                   <React.Fragment key={game.id}>
                     <GameCard game={game} onPlay={() => setActiveGame(game)} />
                     {adPositions.includes(i + 1) && (
-                      <div style={{ gridColumn: '1 / -1', minHeight: 60, background: 'rgba(30,41,59,0.2)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ gridColumn: '1 / -1', minHeight: 60, background: 'rgba(30,41,59,0.15)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <div style={{ width: '100%', maxWidth: 728 }}>
                           <AdUnit />
                         </div>
@@ -356,9 +507,11 @@ const App = () => {
 
       {/* ── Footer ── */}
       <footer style={{
-        borderTop: '1px solid rgba(71,85,105,0.2)',
+        position: 'relative', zIndex: 2,
+        borderTop: '1px solid rgba(71,85,105,0.15)',
         padding: '20px 24px',
-        background: '#0a0f1a',
+        background: 'rgba(10,15,26,0.5)',
+        backdropFilter: 'blur(8px)',
       }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -393,9 +546,7 @@ const App = () => {
               }}
               onMouseEnter={e => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.15)'; e.currentTarget.style.color = '#ef4444'; }}
-              >
-                ✕ Exit
-              </button>
+              >✕ Exit</button>
               <span style={{ fontWeight: 600, fontSize: 14, color: '#94a3b8' }}>
                 Playing: <span style={{ color: '#f1f5f9' }}>{activeGame.name}</span>
               </span>
@@ -411,14 +562,14 @@ const App = () => {
         </div>
       )}
 
-      {/* ── Post-Game ── */}
       {postGame && <PostGameScreen game={postGame} onClose={handleClosePostGame} />}
 
-      {/* ── Global Keyframes ── */}
       <style>{`
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }
-        .game-card:hover { z-index: 2; }
+        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.6; } }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .game-card:hover { z-index: 3; }
+        .skeleton { animation: pulse 1.8s ease-in-out infinite; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0a0f1a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
