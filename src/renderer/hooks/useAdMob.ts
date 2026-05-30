@@ -65,3 +65,53 @@ export function useNativeAdMob(bannerAdId: string, enabled: boolean = true) {
 
   return { showBanner, hideBanner, removeBanner, isNative: Capacitor.isNativePlatform() };
 }
+
+export function useRewardedAd(rewardAdId: string, enabled: boolean = true) {
+  const initialized = useRef(false);
+  const rewardedReady = useRef(false);
+
+  const init = useCallback(async () => {
+    if (initialized.current || !enabled) return;
+    const admob = await getAdMob();
+    if (!admob) return;
+    try {
+      await admob.initialize();
+      initialized.current = true;
+    } catch { /* ignore */ }
+  }, [enabled]);
+
+  const prepareReward = useCallback(async () => {
+    const admob = await getAdMob();
+    if (!admob || rewardedReady.current) return null;
+    try {
+      await admob.prepareRewardVideoAd({ adId: rewardAdId });
+      rewardedReady.current = true;
+      return admob;
+    } catch {
+      return null;
+    }
+  }, [rewardAdId]);
+
+  const showRewarded = useCallback(async (): Promise<boolean> => {
+    const admob = await getAdMob();
+    if (!admob) return false;
+    try {
+      if (!rewardedReady.current) {
+        await prepareReward();
+      }
+      await admob.showRewardVideoAd();
+      rewardedReady.current = false;
+      return true;
+    } catch {
+      rewardedReady.current = false;
+      return false;
+    }
+  }, [prepareReward]);
+
+  useEffect(() => {
+    if (!enabled) return;
+    init();
+  }, [init, enabled]);
+
+  return { prepareReward, showRewarded, isNative: Capacitor.isNativePlatform() };
+}

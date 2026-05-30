@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { Capacitor } from '@capacitor/core';
-import { useNativeAdMob } from './hooks/useAdMob';
+import { useNativeAdMob, useRewardedAd } from './hooks/useAdMob';
 
 /* ── Types ───────────────────────────────────────────────────── */
 interface Game {
@@ -11,6 +11,32 @@ interface Game {
   play_url: string;
   embed_type: string;
   thumbnail: string;
+  instructions: string;
+  controls: string;
+  howToPlay: string;
+}
+
+interface ScoreMap {
+  [gameId: string]: number;
+}
+
+/* ── Constants ────────────────────────────────────────────────── */
+const BANNER_AD_ID = 'ca-app-pub-5224273312267357/9652833196';
+const REWARD_AD_ID = 'ca-app-pub-5224273312267357/2038067050';
+const STORAGE_KEY = 'gamevault_best_scores';
+
+function loadScores(): ScoreMap {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  } catch { return {}; }
+}
+
+function saveScores(scores: ScoreMap) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(scores)); } catch { /* ignore */ }
+}
+
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
 /* ── Background Animation ────────────────────────────────────── */
@@ -31,9 +57,7 @@ const BackgroundAnimation = () => {
     canvas.width = w;
     canvas.height = h;
 
-    interface Star {
-      x: number; y: number; r: number; a: number; da: number; speed: number;
-    }
+    interface Star { x: number; y: number; r: number; a: number; da: number; speed: number; }
     const stars: Star[] = [];
     for (let i = 0; i < 250; i++) {
       stars.push({
@@ -44,17 +68,13 @@ const BackgroundAnimation = () => {
       });
     }
 
-    interface ShootingStar {
-      x: number; y: number; vx: number; vy: number; life: number; maxLife: number;
-    }
+    interface ShootingStar { x: number; y: number; vx: number; vy: number; life: number; maxLife: number; }
     let shootingStars: ShootingStar[] = [];
     let nextShootTimer = 0;
 
     const resize = () => {
-      w = window.innerWidth;
-      h = window.innerHeight;
-      canvas.width = w;
-      canvas.height = h;
+      w = window.innerWidth; h = window.innerHeight;
+      canvas.width = w; canvas.height = h;
     };
     window.addEventListener('resize', resize);
 
@@ -64,21 +84,15 @@ const BackgroundAnimation = () => {
     window.addEventListener('mousemove', onMouse);
 
     let animId: number;
-    const draw = (time: number) => {
+    const draw = () => {
       ctx.clearRect(0, 0, w, h);
-
-      // ---- stars ----
       for (const s of stars) {
-        s.a += s.da;
-        s.y += s.speed;
+        s.a += s.da; s.y += s.speed;
         if (s.y > h + 5) { s.y = -5; s.x = Math.random() * w; }
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(200,220,255,${0.2 + Math.abs(Math.sin(s.a)) * 0.6})`;
         ctx.fill();
       }
-
-      // ---- shooting stars ----
       nextShootTimer--;
       if (nextShootTimer <= 0 && shootingStars.length < 3) {
         const sx = Math.random() * w * 0.8 + w * 0.1;
@@ -92,37 +106,28 @@ const BackgroundAnimation = () => {
         nextShootTimer = 80 + Math.random() * 200;
       }
       shootingStars = shootingStars.filter(s => {
-        s.x += s.vx; s.y += s.vy;
-        s.life -= 1 / s.maxLife;
+        s.x += s.vx; s.y += s.vy; s.life -= 1 / s.maxLife;
         if (s.life <= 0 || s.x > w + 20 || s.y > h + 20) return false;
         const tail = 20;
         const grad = ctx.createLinearGradient(s.x, s.y, s.x - s.vx * tail, s.y - s.vy * tail);
         grad.addColorStop(0, `rgba(200,220,255,${s.life})`);
-        grad.addColorStop(1, `rgba(200,220,255,0)`);
-        ctx.beginPath();
-        ctx.moveTo(s.x, s.y);
+        grad.addColorStop(1, 'rgba(200,220,255,0)');
+        ctx.beginPath(); ctx.moveTo(s.x, s.y);
         ctx.lineTo(s.x - s.vx * tail, s.y - s.vy * tail);
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
+        ctx.strokeStyle = grad; ctx.lineWidth = 1.5; ctx.stroke();
         return true;
       });
-
       animId = requestAnimationFrame(draw);
     };
     animId = requestAnimationFrame(draw);
 
-    // ---- spaceship follow cursor ----
     const ship = shipRef.current;
     let shipAnimId: number;
     const moveShip = () => {
       if (!ship) return;
-      const m = mouseRef.current;
-      const p = shipPosRef.current;
-      p.x += (m.x - p.x) * 0.08;
-      p.y += (m.y - p.y) * 0.08;
-      const dx = m.x - p.x;
-      const dy = m.y - p.y;
+      const m = mouseRef.current; const p = shipPosRef.current;
+      p.x += (m.x - p.x) * 0.08; p.y += (m.y - p.y) * 0.08;
+      const dx = m.x - p.x; const dy = m.y - p.y;
       const angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
       ship.style.transform = `translate(${p.x}px, ${p.y}px) rotate(${angle}deg)`;
       shipAnimId = requestAnimationFrame(moveShip);
@@ -130,8 +135,7 @@ const BackgroundAnimation = () => {
     shipAnimId = requestAnimationFrame(moveShip);
 
     return () => {
-      cancelAnimationFrame(animId);
-      cancelAnimationFrame(shipAnimId);
+      cancelAnimationFrame(animId); cancelAnimationFrame(shipAnimId);
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', onMouse);
     };
@@ -141,20 +145,16 @@ const BackgroundAnimation = () => {
     <>
       <canvas ref={canvasRef} style={{
         position: 'fixed', inset: 0, zIndex: 0,
-        width: '100%', height: '100%',
-        pointerEvents: 'none',
+        width: '100%', height: '100%', pointerEvents: 'none',
       }} />
       <div ref={shipRef} style={{
         position: 'fixed', zIndex: 1, pointerEvents: 'none',
-        top: -20, left: -20,
-        width: 40, height: 40,
-        transition: 'none',
+        top: -20, left: -20, width: 40, height: 40,
       }}>
         <svg viewBox="0 0 40 40" width="40" height="40">
           <defs>
             <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#60a5fa" />
-              <stop offset="100%" stopColor="#3b82f6" />
+              <stop offset="0%" stopColor="#60a5fa" /><stop offset="100%" stopColor="#3b82f6" />
             </linearGradient>
           </defs>
           <polygon points="20,2 30,32 20,26 10,32" fill="url(#bodyGrad)" opacity="0.95" />
@@ -169,15 +169,21 @@ const BackgroundAnimation = () => {
   );
 };
 
+/* ── Genre Colors ────────────────────────────────────────────── */
+const genreColors: Record<string, { bg: string; text: string; glow: string }> = {
+  Arcade:      { bg: 'rgba(234,179,8,0.15)',  text: '#eab308',  glow: 'rgba(234,179,8,0.3)' },
+  Puzzle:      { bg: 'rgba(168,85,247,0.15)',  text: '#a855f7',  glow: 'rgba(168,85,247,0.3)' },
+  Shooting:    { bg: 'rgba(239,68,68,0.15)',   text: '#ef4444',  glow: 'rgba(239,68,68,0.3)' },
+  Racing:      { bg: 'rgba(34,197,94,0.15)',   text: '#22c55e',  glow: 'rgba(34,197,94,0.3)' },
+  Simulation:  { bg: 'rgba(59,130,246,0.15)',  text: '#3b82f6',  glow: 'rgba(59,130,246,0.3)' },
+};
+const allGenres = ['Arcade', 'Puzzle', 'Shooting', 'Racing', 'Simulation'];
+
 /* ── Ad Component ────────────────────────────────────────────── */
-const BANNER_AD_ID = 'ca-app-pub-5224273312267357/9652833196';
-
-let adCount = 0;
 const AdUnit = ({ style = {} }: { style?: React.CSSProperties }) => {
-  const id = useRef(`ad-${++adCount}`);
+  const id = useRef(`ad-${Date.now()}-${Math.random()}`);
   const isNative = Capacitor.isNativePlatform();
-
-  const { showBanner, removeBanner, isNative: _isNative } = useNativeAdMob(BANNER_AD_ID, isNative);
+  const { showBanner, removeBanner } = useNativeAdMob(BANNER_AD_ID, isNative);
 
   useEffect(() => {
     if (isNative) {
@@ -190,9 +196,7 @@ const AdUnit = ({ style = {} }: { style?: React.CSSProperties }) => {
     }
   }, [isNative, showBanner, removeBanner]);
 
-  if (isNative) {
-    return null;
-  }
+  if (isNative) return null;
 
   return (
     <div id={id.current} style={{ width: '100%', ...style }}>
@@ -205,73 +209,147 @@ const AdUnit = ({ style = {} }: { style?: React.CSSProperties }) => {
   );
 };
 
-/* ── Genre Colors ────────────────────────────────────────────── */
-const genreColors: Record<string, { bg: string; text: string; glow: string }> = {
-  Arcade:      { bg: 'rgba(234,179,8,0.15)',  text: '#eab308',  glow: 'rgba(234,179,8,0.3)' },
-  Puzzle:      { bg: 'rgba(168,85,247,0.15)',  text: '#a855f7',  glow: 'rgba(168,85,247,0.3)' },
-  Shooting:    { bg: 'rgba(239,68,68,0.15)',   text: '#ef4444',  glow: 'rgba(239,68,68,0.3)' },
-  Racing:      { bg: 'rgba(34,197,94,0.15)',   text: '#22c55e',  glow: 'rgba(34,197,94,0.3)' },
-  Simulation:  { bg: 'rgba(59,130,246,0.15)',  text: '#3b82f6',  glow: 'rgba(59,130,246,0.3)' },
+/* ── Instructions Modal ──────────────────────────────────────── */
+const InstructionsModal = ({ game, onStart, onBack }: { game: Game; onStart: () => void; onBack: () => void }) => {
+  const gc = genreColors[game.genre] || { bg: 'rgba(100,116,139,0.15)', text: '#94a3b8' };
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 150,
+      background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      padding: 24,
+    }}>
+      <div style={{
+        maxWidth: 520, width: '100%',
+        background: 'linear-gradient(145deg, #1e293b, #0f172a)',
+        borderRadius: 20, border: '1px solid rgba(71,85,105,0.4)',
+        padding: '32px 28px', display: 'flex', flexDirection: 'column', gap: 20,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{
+            width: 48, height: 48, borderRadius: 12,
+            background: gc.bg, border: `1px solid ${gc.text}44`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 22,
+          }}>{game.name.charAt(0)}</div>
+          <div>
+            <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: '#f1f5f9' }}>{game.name}</h2>
+            <span style={{ color: gc.text, fontSize: 12, fontWeight: 600, background: gc.bg, padding: '2px 10px', borderRadius: 10 }}>{game.genre}</span>
+          </div>
+        </div>
+
+        <div style={{ background: 'rgba(30,41,59,0.5)', borderRadius: 12, padding: 16 }}>
+          <p style={{ margin: 0, color: '#cbd5e1', fontSize: 14, lineHeight: 1.6 }}>{game.howToPlay || game.instructions}</p>
+        </div>
+
+        <div style={{ background: 'rgba(59,130,246,0.08)', borderRadius: 12, padding: '12px 16px', border: '1px solid rgba(59,130,246,0.2)' }}>
+          <span style={{ color: '#60a5fa', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Controls</span>
+          <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: 13 }}>{game.controls}</p>
+        </div>
+
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button onClick={onBack} style={{
+            flex: 1, padding: '14px 0',
+            background: 'rgba(71,85,105,0.3)', color: '#94a3b8',
+            border: '1px solid rgba(71,85,105,0.4)', borderRadius: 12,
+            fontSize: 14, fontWeight: 700, cursor: 'pointer',
+          }}>Back</button>
+          <button onClick={onStart} style={{
+            flex: 2, padding: '14px 0',
+            background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
+            color: '#fff', border: 'none', borderRadius: 12,
+            fontSize: 14, fontWeight: 700, cursor: 'pointer',
+            boxShadow: '0 4px 20px rgba(59,130,246,0.3)',
+          }}>Play Now</button>
+        </div>
+      </div>
+    </div>
+  );
 };
-const allGenres = ['Arcade', 'Puzzle', 'Shooting', 'Racing', 'Simulation'];
 
-/* ── Post-Game Screen ────────────────────────────────────────── */
-const PostGameScreen = ({ game, onClose }: { game: Game; onClose: () => void }) => {
-  const [countdown, setCountdown] = useState(5);
-  useEffect(() => {
-    if (countdown <= 0) return;
-    const t = setTimeout(() => setCountdown(c => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [countdown]);
+/* ── Score Display ───────────────────────────────────────────── */
+const ScoreBadge = ({ score }: { score: number }) => {
+  if (score <= 0) return null;
+  return (
+    <span style={{
+      position: 'absolute', bottom: 8, right: 8, zIndex: 2,
+      background: 'rgba(234,179,8,0.15)', color: '#eab308',
+      fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 8,
+      border: '1px solid rgba(234,179,8,0.3)',
+    }}>Best: {score}</span>
+  );
+};
 
-  const gc = genreColors[game.genre] || { bg: 'rgba(100,116,139,0.15)', text: '#94a3b8', glow: 'rgba(100,116,139,0.3)' };
+/* ── Continue / Reward Modal ─────────────────────────────────── */
+const ContinueModal = ({ game, onWatchAd, onClose, canWatch }: { game: Game; onWatchAd: () => void; onClose: () => void; canWatch: boolean }) => {
+  const gc = genreColors[game.genre] || { bg: 'rgba(100,116,139,0.15)', text: '#94a3b8' };
 
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 200,
       background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      gap: 32, padding: 24,
+      gap: 28, padding: 24,
     }}>
       <div style={{ textAlign: 'center' }}>
-        <h2 style={{ color: '#f1f5f9', fontSize: 28, fontWeight: 800, margin: 0 }}>
-          Thanks for playing!
+        <div style={{ fontSize: 56, marginBottom: 8 }}>😢</div>
+        <h2 style={{ color: '#f1f5f9', fontSize: 26, fontWeight: 800, margin: 0 }}>
+          Game Over!
         </h2>
         <span style={{
           display: 'inline-block', marginTop: 8,
-          color: gc.text, fontSize: 20, fontWeight: 700,
+          color: gc.text, fontSize: 18, fontWeight: 700,
           background: gc.bg, padding: '4px 20px', borderRadius: 20,
         }}>{game.name}</span>
       </div>
+
       <div style={{
-        width: '100%', maxWidth: 500, minHeight: 200,
+        width: '100%', maxWidth: 500, minHeight: 160,
         background: 'rgba(30,41,59,0.5)', borderRadius: 16,
         border: '1px solid rgba(71,85,105,0.4)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',
+        gap: 12, padding: 20,
       }}>
-        <AdUnit />
+        {canWatch ? (
+          <>
+            <p style={{ color: '#94a3b8', fontSize: 14, textAlign: 'center', margin: 0 }}>
+              Want to continue playing? Watch a short ad to respawn!
+            </p>
+            <button onClick={onWatchAd} style={{
+              padding: '14px 36px',
+              background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+              color: '#fff', border: 'none', borderRadius: 12,
+              fontSize: 15, fontWeight: 700, cursor: 'pointer',
+              boxShadow: '0 4px 20px rgba(245,158,11,0.3)',
+              display: 'flex', alignItems: 'center', gap: 8,
+            }}>
+              <span>🎬</span> Watch Ad to Continue
+            </button>
+          </>
+        ) : (
+          <p style={{ color: '#64748b', fontSize: 13, textAlign: 'center', margin: 0 }}>
+            Come back later to continue with an ad.
+          </p>
+        )}
       </div>
-      <button onClick={onClose} disabled={countdown > 0} style={{
+
+      <button onClick={onClose} style={{
         padding: '14px 40px',
-        background: countdown > 0
-          ? 'linear-gradient(135deg, #334155, #475569)'
-          : 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+        background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
         color: '#fff', border: 'none', borderRadius: 12,
-        fontSize: 16, fontWeight: 700,
-        cursor: countdown > 0 ? 'not-allowed' : 'pointer',
-        transition: 'all 0.3s',
-        opacity: countdown > 0 ? 0.6 : 1,
-        boxShadow: countdown > 0 ? 'none' : '0 4px 20px rgba(59,130,246,0.3)',
+        fontSize: 16, fontWeight: 700, cursor: 'pointer',
+        boxShadow: '0 4px 20px rgba(59,130,246,0.3)',
       }}>
-        {countdown > 0 ? `Back to Library (${countdown})` : 'Back to Library'}
+        Back to Library
       </button>
     </div>
   );
 };
 
 /* ── Game Card ───────────────────────────────────────────────── */
-const GameCard = ({ game, onPlay }: { game: Game; onPlay: () => void }) => {
-  const gc = genreColors[game.genre] || { bg: 'rgba(100,116,139,0.15)', text: '#94a3b8', glow: 'rgba(100,116,139,0.3)' };
+const GameCard = ({ game, onPlay, bestScore }: { game: Game; onPlay: () => void; bestScore: number }) => {
+  const gc = genreColors[game.genre] || { bg: 'rgba(100,116,139,0.15)', text: '#94a3b8' };
 
   return (
     <div className="game-card" style={{
@@ -281,8 +359,7 @@ const GameCard = ({ game, onPlay }: { game: Game; onPlay: () => void }) => {
       border: '1px solid rgba(71,85,105,0.3)',
       display: 'flex', flexDirection: 'column',
       transition: 'transform 0.3s, box-shadow 0.3s, border-color 0.3s',
-      cursor: 'pointer',
-      position: 'relative',
+      cursor: 'pointer', position: 'relative',
     }}
     onMouseEnter={e => {
       e.currentTarget.style.transform = 'translateY(-6px)';
@@ -295,39 +372,43 @@ const GameCard = ({ game, onPlay }: { game: Game; onPlay: () => void }) => {
       e.currentTarget.style.borderColor = 'rgba(71,85,105,0.3)';
     }}
     >
-      <div style={{ height: 150, background: '#0f172a', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+      <div style={{
+        height: 150, background: '#0f172a',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        position: 'relative', overflow: 'hidden',
+      }}>
         <div style={{
           position: 'absolute', inset: 0,
-          background: `linear-gradient(180deg, transparent 50%, rgba(15,23,42,0.9) 100%)`,
+          background: 'linear-gradient(180deg, transparent 50%, rgba(15,23,42,0.9) 100%)',
           zIndex: 1,
         }} />
-        <img src={game.thumbnail} alt={game.name}
-          style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', opacity: 0.85, transition: 'opacity 0.3s, transform 0.3s' }}
-          onMouseEnter={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1.05)'; }}
-          onMouseLeave={e => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.transform = 'scale(1)'; }}
+        <img src={game.thumbnail} alt={game.name} loading="lazy"
+          style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', opacity: 0.85 }}
           onError={e => {
             (e.target as HTMLImageElement).src =
-              'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMjAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWUyOTNiIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZpbGw9IiM2NDc0OGIiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
+              'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMjAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMWUyOTNiIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZpbGw9IiM2NDc0OGIiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+R2FtZTwvdGV4dD48L3N2Zz4=';
           }}
         />
         <span style={{
           position: 'absolute', top: 10, right: 10, zIndex: 2,
           background: gc.bg, color: gc.text,
           fontSize: 10, fontWeight: 700, padding: '3px 10px', borderRadius: 20,
-          border: `1px solid ${gc.text}33`,
-          backdropFilter: 'blur(4px)',
+          border: `1px solid ${gc.text}33`, backdropFilter: 'blur(4px)',
         }}>{game.genre}</span>
+        <ScoreBadge score={bestScore} />
       </div>
       <div style={{ padding: '14px 16px 16px', display: 'flex', flexDirection: 'column', flex: 1, gap: 8 }}>
         <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#f1f5f9', lineHeight: 1.3 }}>{game.name}</h3>
-        <p style={{ margin: 0, fontSize: 12, color: '#94a3b8', lineHeight: 1.5, flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{game.description}</p>
+        <p style={{
+          margin: 0, fontSize: 12, color: '#94a3b8', lineHeight: 1.5, flex: 1,
+          display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+        }}>{game.description}</p>
         <button onClick={onPlay} style={{
           marginTop: 4, padding: '10px 0', width: '100%',
           background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
           color: '#fff', border: 'none', borderRadius: 10,
           fontSize: 13, fontWeight: 700, cursor: 'pointer',
-          transition: 'all 0.3s',
-          letterSpacing: 0.5,
+          transition: 'all 0.3s', letterSpacing: 0.5,
         }}
         onMouseEnter={e => {
           e.currentTarget.style.background = 'linear-gradient(135deg, #60a5fa, #818cf8)';
@@ -337,7 +418,7 @@ const GameCard = ({ game, onPlay }: { game: Game; onPlay: () => void }) => {
           e.currentTarget.style.background = 'linear-gradient(135deg, #3b82f6, #6366f1)';
           e.currentTarget.style.boxShadow = 'none';
         }}>
-          ▶ Play Now
+          Play Now
         </button>
       </div>
     </div>
@@ -348,7 +429,6 @@ const GameCard = ({ game, onPlay }: { game: Game; onPlay: () => void }) => {
 const Skeleton = () => (
   <div className="skeleton" style={{
     background: 'linear-gradient(145deg, rgba(30,41,59,0.8), rgba(15,23,42,0.9))',
-    backdropFilter: 'blur(8px)',
     borderRadius: 16, overflow: 'hidden',
     border: '1px solid rgba(71,85,105,0.3)',
   }}>
@@ -377,12 +457,21 @@ const EmptyState = ({ query }: { query: string }) => (
 const App = () => {
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeGame, setActiveGame] = useState<Game | null>(null);
-  const [postGame, setPostGame] = useState<Game | null>(null);
   const [search, setSearch] = useState('');
   const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 
+  const [pendingGame, setPendingGame] = useState<Game | null>(null);
+  const [activeGame, setActiveGame] = useState<Game | null>(null);
+  const [showContinue, setShowContinue] = useState<Game | null>(null);
+  const [scores, setScores] = useState<ScoreMap>({});
+  const [iframeError, setIframeError] = useState(false);
+  const [canWatchReward, setCanWatchReward] = useState(false);
+
+  const [lastScore, setLastScore] = useState(0);
+  const rewardAd = useRewardedAd(REWARD_AD_ID, Capacitor.isNativePlatform());
+
   useEffect(() => {
+    setScores(loadScores());
     fetch('/games-database.json')
       .then(r => r.json())
       .then(data => { setGames(data); setLoading(false); })
@@ -397,12 +486,66 @@ const App = () => {
     });
   }, [games, search, selectedGenre]);
 
-  const handleExitGame = () => {
-    if (activeGame) setPostGame(activeGame);
-    setActiveGame(null);
+  const handlePlay = (game: Game) => {
+    setPendingGame(game);
+    setIframeError(false);
   };
 
-  const handleClosePostGame = () => setPostGame(null);
+  const handleStartGame = () => {
+    if (pendingGame) {
+      setActiveGame(pendingGame);
+      setPendingGame(null);
+      setCanWatchReward(true);
+    }
+  };
+
+  const handleExitGame = () => {
+    if (activeGame) {
+      const g = activeGame;
+      setActiveGame(null);
+      setShowContinue(g);
+      if (Capacitor.isNativePlatform()) {
+        rewardAd.prepareReward();
+      }
+    }
+  };
+
+  const handleWatchAd = async () => {
+    if (!showContinue) return;
+    if (Capacitor.isNativePlatform()) {
+      const watched = await rewardAd.showRewarded();
+      if (watched) {
+        setActiveGame(showContinue);
+        setShowContinue(null);
+      }
+    } else {
+      setActiveGame(showContinue);
+      setShowContinue(null);
+    }
+  };
+
+  const handleCloseContinue = () => {
+    setShowContinue(null);
+    setCanWatchReward(true);
+  };
+
+  const handleSetScore = (gameId: string, score: number) => {
+    const updated = { ...scores };
+    if (!updated[gameId] || score > updated[gameId]) {
+      updated[gameId] = score;
+      setScores(updated);
+      saveScores(updated);
+    }
+    setLastScore(score);
+  };
+
+  const handleIframeError = () => {
+    setIframeError(true);
+  };
+
+  const openInBrowser = (url: string) => {
+    window.open(url, '_blank');
+  };
 
   const adPositions = useMemo(() => {
     const positions: number[] = [];
@@ -417,7 +560,6 @@ const App = () => {
 
       <BackgroundAnimation />
 
-      {/* ── Header ── */}
       <header style={{
         position: 'relative', zIndex: 2,
         background: 'linear-gradient(135deg, rgba(15,23,42,0.85) 0%, rgba(30,41,59,0.7) 50%, rgba(15,23,42,0.85) 100%)',
@@ -439,7 +581,7 @@ const App = () => {
                 GameVault
               </h1>
               <p style={{ margin: '2px 0 0', fontSize: 12, color: '#64748b', fontWeight: 500 }}>
-                Play free browser games instantly
+                {isMobileDevice() ? 'Tap any game, read instructions, then play!' : 'Play free browser games instantly'}
               </p>
             </div>
           </div>
@@ -481,7 +623,6 @@ const App = () => {
         </div>
       </header>
 
-      {/* ── Ad ── */}
       <div style={{ position: 'relative', zIndex: 2, padding: '8px 24px', borderBottom: '1px solid rgba(71,85,105,0.15)', background: 'rgba(10,15,26,0.5)', backdropFilter: 'blur(8px)' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', minHeight: 60, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ width: '100%', maxWidth: 728, minHeight: 60, background: 'rgba(30,41,59,0.2)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#475569', fontSize: 11 }}>
@@ -490,7 +631,6 @@ const App = () => {
         </div>
       </div>
 
-      {/* ── Main Content ── */}
       <main style={{ position: 'relative', zIndex: 2, maxWidth: 1200, margin: '0 auto', padding: '28px 24px 60px' }}>
         {!loading && (
           <p style={{ margin: '0 0 20px', fontSize: 13, color: '#64748b' }}>
@@ -509,7 +649,7 @@ const App = () => {
               ? <EmptyState query={search} />
               : filtered.map((game, i) => (
                   <React.Fragment key={game.id}>
-                    <GameCard game={game} onPlay={() => setActiveGame(game)} />
+                    <GameCard game={game} onPlay={() => handlePlay(game)} bestScore={scores[game.id] || 0} />
                     {adPositions.includes(i + 1) && (
                       <div style={{ gridColumn: '1 / -1', minHeight: 60, background: 'rgba(30,41,59,0.15)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <div style={{ width: '100%', maxWidth: 728 }}>
@@ -523,7 +663,6 @@ const App = () => {
         </div>
       </main>
 
-      {/* ── Footer ── */}
       <footer style={{
         position: 'relative', zIndex: 2,
         borderTop: '1px solid rgba(71,85,105,0.15)',
@@ -538,12 +677,24 @@ const App = () => {
             <span style={{ color: '#475569', fontSize: 12 }}>Free browser games</span>
           </div>
           <div style={{ display: 'flex', gap: 16 }}>
-            <span style={{ color: '#334155', fontSize: 12 }}>© 2026</span>
+            {Object.keys(scores).length > 0 && (
+              <span style={{ color: '#475569', fontSize: 12 }}>
+                {Object.keys(scores).length} game{Object.keys(scores).length !== 1 && 's'} played
+              </span>
+            )}
+            <span style={{ color: '#334155', fontSize: 12 }}>2026</span>
           </div>
         </div>
       </footer>
 
-      {/* ── Game Player Modal ── */}
+      {pendingGame && !activeGame && (
+        <InstructionsModal
+          game={pendingGame}
+          onStart={handleStartGame}
+          onBack={() => setPendingGame(null)}
+        />
+      )}
+
       {activeGame && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 100, background: '#000',
@@ -551,47 +702,95 @@ const App = () => {
           animation: 'fadeIn 0.2s ease',
         }}>
           <div style={{
-            height: 56, background: '#0f172a', borderBottom: '1px solid rgba(71,85,105,0.3)',
+            height: isMobileDevice() ? 48 : 56,
+            background: '#0f172a', borderBottom: '1px solid rgba(71,85,105,0.3)',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '0 16px', flexShrink: 0,
+            padding: '0 12px 0 16px', flexShrink: 0,
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>
               <button onClick={handleExitGame} style={{
                 background: 'rgba(239,68,68,0.15)', color: '#ef4444',
                 border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8,
-                padding: '8px 16px', fontWeight: 700, fontSize: 13,
-                cursor: 'pointer', transition: 'all 0.2s',
+                padding: isMobileDevice() ? '6px 12px' : '8px 16px',
+                fontWeight: 700, fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap',
               }}
               onMouseEnter={e => { e.currentTarget.style.background = '#ef4444'; e.currentTarget.style.color = '#fff'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.15)'; e.currentTarget.style.color = '#ef4444'; }}
-              >✕ Exit</button>
-              <span style={{ fontWeight: 600, fontSize: 14, color: '#94a3b8' }}>
-                Playing: <span style={{ color: '#f1f5f9' }}>{activeGame.name}</span>
+              >Exit</button>
+              <span style={{
+                fontWeight: 600, fontSize: isMobileDevice() ? 12 : 14,
+                color: '#94a3b8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
+                {activeGame.name}
               </span>
             </div>
+            {iframeError && (
+              <button onClick={() => openInBrowser(activeGame.play_url)} style={{
+                background: 'rgba(59,130,246,0.15)', color: '#60a5fa',
+                border: '1px solid rgba(59,130,246,0.3)', borderRadius: 8,
+                padding: '6px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer',
+              }}>Open in Browser</button>
+            )}
           </div>
           <div style={{ flex: 1, position: 'relative', background: '#000' }}>
-            <iframe src={activeGame.play_url} title={activeGame.name}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none' }}
-              allow="fullscreen; autoplay; keyboard"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups"
-            />
+            {iframeError ? (
+              <div style={{
+                position: 'absolute', inset: 0,
+                display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center',
+                gap: 16, padding: 24, textAlign: 'center',
+              }}>
+                <div style={{ fontSize: 48 }}>⚠️</div>
+                <h3 style={{ color: '#f1f5f9', margin: 0, fontSize: 18 }}>Game could not load</h3>
+                <p style={{ color: '#94a3b8', fontSize: 13, margin: 0, maxWidth: 400 }}>
+                  This game may not support embedding. Try opening it directly in your browser.
+                </p>
+                <button onClick={() => openInBrowser(activeGame.play_url)} style={{
+                  padding: '12px 28px',
+                  background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
+                  color: '#fff', border: 'none', borderRadius: 10,
+                  fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                }}>Open in Browser</button>
+              </div>
+            ) : (
+              <iframe
+                key={activeGame.id + '-' + Date.now()}
+                src={activeGame.play_url}
+                title={activeGame.name}
+                style={{
+                  position: 'absolute', inset: 0,
+                  width: '100%', height: '100%', border: 'none',
+                }}
+                allow="fullscreen; autoplay; keyboard"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-pointer-lock allow-popups"
+                onError={handleIframeError}
+              />
+            )}
           </div>
         </div>
       )}
 
-      {postGame && <PostGameScreen game={postGame} onClose={handleClosePostGame} />}
+      {showContinue && (
+        <ContinueModal
+          game={showContinue}
+          onWatchAd={handleWatchAd}
+          onClose={handleCloseContinue}
+          canWatch={canWatchReward}
+        />
+      )}
 
       <style>{`
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.6; } }
-        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
         .game-card:hover { z-index: 3; }
         .skeleton { animation: pulse 1.8s ease-in-out infinite; }
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #0a0f1a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        @media (max-width: 480px) {
+          .game-card { border-radius: 12px; }
+        }
       `}</style>
     </div>
   );
