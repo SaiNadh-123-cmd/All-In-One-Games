@@ -13,3 +13,6 @@ android/local.properties
 android/captures
 .idea
 *.iml
+
+# Android signing
+android/keystore.properties
